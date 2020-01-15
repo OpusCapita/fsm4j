@@ -1,0 +1,2 @@
+//include ":core", ":new-module"
+include ":core"
