@@ -1,0 +1,265 @@
+version: 2
+jobs:
+  unittests:
+    docker:
+      - image: opuscapita/minsk-core-ci:grails-2.4.4-jdk-8u131-nodejs-8.9.4-maven-3.3.9
+    working_directory: ~/build
+    steps:
+      - run:
+          name: Inject environment
+          command: |
+            env_inject.sh
+      - checkout
+      - restore_cache:
+          keys:
+            - 'v1-fsm-{{ .Branch }}-{{ checksum "core/pom.xml" }}-{{ checksum "history/grails-app/conf/BuildConfig.groovy" }}'
+            - 'v1-fsm-{{ .Branch }}'
+            - v1-fsm
+      - run:
+          name: Test & Install Local
+          command: mvn -B -Dmaven.test.failure.ignore=false test install
+          working_directory: ~/build/core
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/junit/
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/junit
+      - run:
+          name: Grails tests
+          command: grails test-app
+          working_directory: ~/build/history
+      - run:
+          name: Save grails test results.
+          command: |
+            mkdir -p ~/test-xml-reports/
+            find . -type f -regex ".*/target/test-reports/.*xml" -exec cp -v {} ~/test-xml-reports/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-xml-reports
+      - store_artifacts:
+          path: ~/test-xml-reports
+      - save_cache:
+          key: 'v1-fsm-{{ .Branch }}-{{ checksum "core/pom.xml" }}-{{ checksum "history/grails-app/conf/BuildConfig.groovy" }}'
+          paths: ~/.m2/repository
+
+  integrationtests-mysql:
+    docker:
+      - image: opuscapita/minsk-core-ci:grails-2.4.4-jdk-8u131-nodejs-8.9.4-maven-3.3.9
+
+      - image: opuscapita/minsk-core-mysql-ci:5.6
+        environment:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testuser
+
+    working_directory: ~/build
+    steps:
+      - run:
+          name: Inject environment
+          command: |
+            env_inject.sh
+      - checkout
+      - restore_cache:
+          keys:
+            - 'v1-fsm-{{ .Branch }}-{{ checksum "core/pom.xml" }}-{{ checksum "history/grails-app/conf/BuildConfig.groovy" }}'
+            - 'v1-fsm-{{ .Branch }}'
+            - v1-fsm
+      - run:
+          name: Refresh grails dependencies (integration tests)
+          command: grails refresh-dependencies --non-interactive
+          working_directory: ~/build/integration-tests
+      - run:
+          name: Running tests on mysql (integration tests)
+          command: |
+            echo "Running mysql integration tests"
+            grails test-app -Dgrails.env=test -Ddb=mysql -Ddb.admin.url=jdbc:mysql://localhost/mysql -Ddb.admin.username=root -Ddb.admin.password=root -Ddb.url=jdbc:mysql://localhost/testdb -Ddb.username=testuser -Ddb.password=testuser --stacktrace --offline
+          working_directory: ~/build/integration-tests
+      - run:
+          name: Save grails test results
+          command: |
+            mkdir -p ~/integration-test-xml-reports/
+            find . -type f -regex ".*/target/test-reports/.*xml" -exec cp -v {} ~/integration-test-xml-reports/ \;
+          when: always
+          working_directory: ~/build/integration-tests
+      - store_test_results:
+          path: ~/integration-test-xml-reports
+      - store_artifacts:
+          path: ~/integration-test-xml-reports
+  integrationtests-mssql:
+    docker:
+      - image: opuscapita/minsk-core-ci:grails-2.4.4-jdk-8u131-nodejs-8.9.4-maven-3.3.9
+
+      - image: microsoft/mssql-server-linux:2017-GA
+        environment:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: q1w2e3!@#
+
+    working_directory: ~/build
+    steps:
+      - run:
+          name: Inject environment
+          command: |
+            env_inject.sh
+      - checkout
+      - restore_cache:
+          keys:
+            - 'v1-fsm-{{ .Branch }}-{{ checksum "core/pom.xml" }}-{{ checksum "history/grails-app/conf/BuildConfig.groovy" }}'
+            - 'v1-fsm-{{ .Branch }}'
+            - v1-fsm
+      - run:
+          name: Refresh grails dependencies (integration tests)
+          command: grails refresh-dependencies --non-interactive
+          working_directory: ~/build/integration-tests
+      - run:
+          name: Running tests on sqlserver (integration tests)
+          command: |
+            echo "Creating sqlserver database 'testdb'"
+            grails create-database -Dgrails.env=test -Ddb=sqlserver -Ddb.admin.url="jdbc:jtds:sqlserver://localhost:1433;DatabaseName=master" -Ddb.admin.username=sa -Ddb.admin.password="q1w2e3!@#" -Ddb.url="jdbc:jtds:sqlserver://localhost:1433;DatabaseName=testdb" -Ddb.username=sa -Ddb.password="q1w2e3!@#"
+            echo "Running sqlserver integration tests"
+            grails test-app -Dgrails.env=test -Ddb=sqlserver -Ddb.admin.url="jdbc:jtds:sqlserver://localhost:1433;DatabaseName=master" -Ddb.admin.username=sa -Ddb.admin.password="q1w2e3!@#" -Ddb.url="jdbc:jtds:sqlserver://localhost:1433;DatabaseName=testdb" -Ddb.username=sa -Ddb.password="q1w2e3!@#" --stacktrace --offline
+          working_directory: ~/build/integration-tests
+      - run:
+          name: Drop sqlserver database (integration tests)
+          command: |
+            grails drop-database -Dgrails.env=test -Ddb=sqlserver -Ddb.admin.url="jdbc:jtds:sqlserver://localhost:1433;DatabaseName=master" -Ddb.admin.username=sa -Ddb.admin.password="q1w2e3!@#" -Ddb.url="jdbc:jtds:sqlserver://localhost:1433;DatabaseName=testdb" -Ddb.username=sa -Ddb.password="q1w2e3!@#"
+            echo "Dropped sqlserver database 'testdb'"
+          working_directory: ~/build/integration-tests
+          when: always
+      - run:
+          name: Save grails test results
+          command: |
+            mkdir -p ~/integration-test-xml-reports/
+            find . -type f -regex ".*/target/test-reports/.*xml" -exec cp -v {} ~/integration-test-xml-reports/ \;
+          when: always
+          working_directory: ~/build/integration-tests
+      - store_test_results:
+          path: ~/integration-test-xml-reports
+      - store_artifacts:
+          path: ~/integration-test-xml-reports
+  integrationtests-oracle:
+    docker:
+      - image: opuscapita/minsk-core-ci:grails-2.4.4-jdk-8u131-nodejs-8.9.4-maven-3.3.9
+    working_directory: ~/build
+    steps:
+      - run:
+          name: Inject environment
+          command: |
+            env_inject.sh
+            DB_NAME=$(echo "${CIRCLE_PROJECT_REPONAME}_${CIRCLE_BUILD_NUM}" | tr "-" "_" | awk '{print toupper($0)}')
+            echo "export TEST_DB_NAME='${DB_NAME}'" >> $BASH_ENV
+            source $BASH_ENV
+      - checkout
+      - restore_cache:
+          keys:
+            - 'v1-fsm-{{ .Branch }}-{{ checksum "core/pom.xml" }}-{{ checksum "history/grails-app/conf/BuildConfig.groovy" }}'
+            - 'v1-fsm-{{ .Branch }}'
+            - v1-fsm
+      - run:
+          name: Refresh grails dependencies (integration tests)
+          command: grails refresh-dependencies --non-interactive
+          working_directory: ~/build/integration-tests
+      - run:
+          name: Running tests on oracle (integration tests)
+          command: |
+            echo "Creating oracle database '${TEST_DB_NAME}'"
+            grails create-database -Dgrails.env=test -Ddb=oracle -Ddb.admin.url="jdbc:oracle:thin:@${MINSK_CORE_DB_ORACLE_11G_HOST}:${MINSK_CORE_DB_ORACLE_11G_PORT}:${MINSK_CORE_DB_ORACLE_11G_SID}" -Ddb.admin.username=${MINSK_CORE_DB_ORACLE_11G_USER} -Ddb.admin.password=${MINSK_CORE_DB_ORACLE_11G_PASS} -Ddb.url="jdbc:oracle:thin:@${MINSK_CORE_DB_ORACLE_11G_HOST}:${MINSK_CORE_DB_ORACLE_11G_PORT}:${MINSK_CORE_DB_ORACLE_11G_SID}" -Ddb.username=${TEST_DB_NAME} -Ddb.password=${MINSK_CORE_DB_ORACLE_11G_PASS}
+            echo "Running oracle integration tests"
+            grails test-app -Dgrails.env=test -Ddb=oracle -Ddb.admin.url="jdbc:oracle:thin:@${MINSK_CORE_DB_ORACLE_11G_HOST}:${MINSK_CORE_DB_ORACLE_11G_PORT}:${MINSK_CORE_DB_ORACLE_11G_SID}" -Ddb.admin.username=${MINSK_CORE_DB_ORACLE_11G_USER} -Ddb.admin.password=${MINSK_CORE_DB_ORACLE_11G_PASS} -Ddb.url="jdbc:oracle:thin:@${MINSK_CORE_DB_ORACLE_11G_HOST}:${MINSK_CORE_DB_ORACLE_11G_PORT}:${MINSK_CORE_DB_ORACLE_11G_SID}" -Ddb.username=${TEST_DB_NAME} -Ddb.password=${MINSK_CORE_DB_ORACLE_11G_PASS} --stacktrace --offline
+          working_directory: ~/build/integration-tests
+      - run:
+          name: Drop oracle database (integration tests)
+          command: |
+            grails drop-database -Dgrails.env=test -Ddb=oracle -Ddb.admin.url="jdbc:oracle:thin:@${MINSK_CORE_DB_ORACLE_11G_HOST}:${MINSK_CORE_DB_ORACLE_11G_PORT}:${MINSK_CORE_DB_ORACLE_11G_SID}" -Ddb.admin.username=${MINSK_CORE_DB_ORACLE_11G_USER} -Ddb.admin.password=${MINSK_CORE_DB_ORACLE_11G_PASS} -Ddb.url="jdbc:oracle:thin:@${MINSK_CORE_DB_ORACLE_11G_HOST}:${MINSK_CORE_DB_ORACLE_11G_PORT}:${MINSK_CORE_DB_ORACLE_11G_SID}" -Ddb.username=${TEST_DB_NAME} -Ddb.password=${MINSK_CORE_DB_ORACLE_11G_PASS}
+            echo "Dropped oracle database '${TEST_DB_NAME}'"
+          working_directory: ~/build/integration-tests
+          when: always
+      - run:
+          name: Save grails test results
+          command: |
+            mkdir -p ~/integration-test-xml-reports/
+            find . -type f -regex ".*/target/test-reports/.*xml" -exec cp -v {} ~/integration-test-xml-reports/ \;
+          when: always
+          working_directory: ~/build/integration-tests
+      - store_test_results:
+          path: ~/integration-test-xml-reports
+      - store_artifacts:
+          path: ~/integration-test-xml-reports
+  deploy-artifacts-and-documentation:
+    docker:
+      - image: opuscapita/minsk-core-ci:grails-2.4.4-jdk-8u131-nodejs-8.9.4-maven-3.3.9
+    working_directory: ~/build
+    steps:
+      - run:
+          name: Inject environment
+          command: env_inject.sh
+      - checkout
+      - restore_cache:
+          keys:
+            - 'v1-fsm-{{ .Branch }}-{{ checksum "core/pom.xml" }}-{{ checksum "history/grails-app/conf/BuildConfig.groovy" }}'
+            - 'v1-fsm-{{ .Branch }}'
+            - v1-fsm
+      - run:
+          name: Deploy maven artefact
+          command: mvn -B -Dmaven.test.failure.ignore=false deploy
+          working_directory: ~/build/core
+      - run:
+          name: Refresh grails dependencies
+          command: grails refresh-dependencies --non-interactive
+          working_directory: ~/build/history
+      - run:
+          name: Deploy build artifacts
+          command: grails maven-deploy -Dgrails.env=prod -verbose
+          working_directory: ~/build/history
+      - run:
+          name: Build and deploy documentation
+          command: |
+            if [ ! -z "${CIRCLE_TAG}" ]; then
+              rm -rf plugin.xml
+              generate-html-from-raml.sh -s src -t target/docs/raml
+              grails doc --offline
+              grailsTechnicalDocumentationRsyncToAzure.sh
+            fi
+          working_directory: ~/build/history
+      - save_cache:
+          key: 'v1-fsm-{{ .Branch }}-{{ checksum "core/pom.xml" }}-{{ checksum "history/grails-app/conf/BuildConfig.groovy" }}'
+          paths:
+            - ~/.m2/repository
+
+workflows:
+  version: 2
+  build-test-deploy:
+    jobs:
+      - unittests:
+          filters:
+            tags:
+              only: /.*/
+      - integrationtests-mysql:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - unit-tests
+      - integrationtests-mssql:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - unit-tests
+      - integrationtests-oracle:
+          filters:
+            tags:
+              only: /.*/
+          requires:
+            - unit-tests
+      - deploy-artifacts-and-documentation:
+          filters:
+            tags:
+              only: /.*/ 
+          requires:
+            - integrationtests-mysql
+            - integrationtests-mssql
+            - integrationtests-oracle
