@@ -21,7 +21,7 @@ class WorkflowTransitionHistory {
         table "WorkflowTransitionHistory"
         id column: "WorkflowTransitionHistorySN"
         from column: "`From`", length: 255
-        to column: "To", length: 255
+        to column: "`To`", length: 255
         event column: "Event", length: 255
         businessObjType column: "BusinessObjType", length: 255
         businessObjId column: "BusinessObjID", length: 255

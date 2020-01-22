@@ -11,7 +11,7 @@
       <column name="`From`" type="string(255)">
         <constraints nullable="false"/>
       </column>
-      <column name="To" type="string(255)">
+      <column name="`To`" type="string(255)">
         <constraints nullable="false"/>
       </column>
       <column name="Event" type="string(255)">

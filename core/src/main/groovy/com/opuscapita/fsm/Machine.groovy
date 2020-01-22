@@ -305,11 +305,10 @@ It is expected to be a closure like this:
         def order = sortingParams.order
 
         return this.history.search([
-                object      : convertObjectToReference(object),
                 user        : user,
                 finishedOn  : finishedOn,
                 workflowName: machineDefinition.schema.name
-        ], [max: max, offset: offset], [by: by, order: order]).collect { historyRecord ->
+        ] + convertObjectToReference(object), [max: max, offset: offset], [by: by, order: order]).collect { historyRecord ->
             String event = historyRecord.event
             String from = historyRecord.from
             String to = historyRecord.to

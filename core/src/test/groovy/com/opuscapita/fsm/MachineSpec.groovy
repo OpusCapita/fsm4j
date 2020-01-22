@@ -195,7 +195,7 @@ class MachineSpec extends Specification {
         passedSearchParameters.size() == 1
         passedPaging.size() == 1
         passedSorting.size() == 1
-        passedSearchParameters[0] == (searchParams + [object: convertObjectToReference(object), workflowName: "sprint"])
+        passedSearchParameters[0] == ([user: searchParams.user, finishedOn: searchParams.finishedOn] + [workflowName: "sprint"] + convertObjectToReference(object))
         passedPaging[0] == paging
         passedSorting[0] == sorting
         res.size() == 1
