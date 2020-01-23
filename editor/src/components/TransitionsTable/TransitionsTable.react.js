@@ -35,7 +35,8 @@ export default class TransitionsTable extends PureComponent {
     onSaveGuards: PropTypes.func.isRequired,
     onSaveAutomatic: PropTypes.func.isRequired,
     onSaveActions: PropTypes.func.isRequired,
-    componentsRegistry: PropTypes.objectOf(PropTypes.func)
+    componentsRegistry: PropTypes.objectOf(PropTypes.func),
+    expressionEvaluator: PropTypes.func
   }
 
   static contextTypes = {
@@ -87,7 +88,7 @@ export default class TransitionsTable extends PureComponent {
 
   render() {
     const { i18n } = this.context;
-    const { transitions = [], states = [], actions, conditions } = this.props;
+    const { transitions = [], states = [], actions, conditions, expressionEvaluator } = this.props;
     const { showModal, currentTransition, modalType } = this.state;
     const getStateLabel = getLabel(i18n)('states');
 
@@ -162,6 +163,7 @@ export default class TransitionsTable extends PureComponent {
         case 'guards':
           modal = (
             <Guards
+              expressionEvaluator={expressionEvaluator}
               guards={transition.guards}
               conditions={conditions}
               title={i18n.getMessage('fsmWorkflowEditor.ui.guards.title', {
@@ -177,6 +179,7 @@ export default class TransitionsTable extends PureComponent {
         case 'automatic':
           modal = (
             <Automatic
+              expressionEvaluator={expressionEvaluator}
               guards={transition.automatic}
               conditions={conditions}
               title={i18n.getMessage('fsmWorkflowEditor.ui.automatic.title', {

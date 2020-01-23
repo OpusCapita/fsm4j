@@ -30,7 +30,8 @@ export default class ReleaseTable extends PureComponent {
     })),
     config: releaseGuardsPropTypes,
     availableNames: PropTypes.arrayOf(PropTypes.string),
-    from: PropTypes.string.isRequired
+    from: PropTypes.string.isRequired,
+    expressionEvaluator: PropTypes.func
   }
 
   static contextTypes = {
@@ -176,7 +177,7 @@ export default class ReleaseTable extends PureComponent {
 
   render() {
     const { i18n } = this.context;
-    const { title, conditions, availableNames, from } = this.props;
+    const { title, conditions, availableNames, from, expressionEvaluator } = this.props;
     const { releaseGuards, showModal, currentIndex, modalType } = this.state;
 
     let modal;
@@ -192,6 +193,7 @@ export default class ReleaseTable extends PureComponent {
         case 'guards':
           modal = (
             <Guards
+              expressionEvaluator={expressionEvaluator}
               guards={(releaseGuard || {}).guards}
               conditions={conditions}
               title={i18n.getMessage('fsmWorkflowEditor.ui.guards.label')}

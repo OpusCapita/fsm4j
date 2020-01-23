@@ -31,8 +31,28 @@ export default class GuardEditor extends PureComponent {
     }),
     componentsRegistry: PropTypes.objectOf(PropTypes.func),
     onClose: PropTypes.func.isRequired,
-    onSave: PropTypes.func.isRequired
+    onSave: PropTypes.func.isRequired,
+    expressionEvaluator: PropTypes.func
   }
+
+  static defaultProps = {
+    expressionEvaluator({code, arg}) {
+      return new Promise((resolve, reject) => {
+        try {
+          resolve(eval( // eslint-disable-line no-eval
+            `
+            (function(arg) {
+              ${Object.keys(arg).map(key => `var ${key} = arg[${JSON.stringify(key)}];`).join('\n')}
+              return (${code})
+            })
+          `
+          )(arg));
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }
+  };
 
   static contextTypes = {
     i18n: PropTypes.object.isRequired,
@@ -130,52 +150,36 @@ export default class GuardEditor extends PureComponent {
 
   autoPlay = _ => this.state.autoplay && this.handleEvalCode();
 
-  evaluateCode = ({ code, arg }) => {
-    const { i18n } = this.context;
-    try {
-      const result = (
-        eval( // eslint-disable-line no-eval
-          `
-            (function(arg) {
-              ${Object.keys(arg).map(key => `var ${key} = arg[${JSON.stringify(key)}];`).join('\n')}
-              return (${code})
-            })
-          `
-        )(arg)
-      );
-
-      return typeof result === 'boolean' ?
-        String(result) :
-        new Error(i18n.getMessage(
-          'fsmWorkflowEditor.ui.guards.editor.wrongResultType',
-          { value: result, type: typeof result }
-        ));
-    } catch (err) {
-      return err
-    }
-  }
-
   handleEvalCode = _ => {
     const { alias } = this.context.objectConfiguration;
     const { expression: code } = this.state.guard;
     const object = cloneDeep(this.state.exampleObject);
+    const {expressionEvaluator} = this.props;
+    const { i18n } = this.context;
 
-    const result = code ?
-      this.evaluateCode({
+    if (code) {
+      expressionEvaluator({
         code,
         arg: {
           object,
           ...(alias && { [alias]: object })
         }
-      }) :
-      null;
-
-    const isError = result instanceof Error;
-
-    return this.setState(prevState => ({
-      isError,
-      result: isError ? result.message : result
-    }))
+      }).then(result => {
+        if (typeof result === 'boolean') {
+          this.setState(({isError: false, result: String(result)}));
+        } else {
+          const errorMessage = i18n.getMessage(
+            'fsmWorkflowEditor.ui.guards.editor.wrongResultType',
+            { value: result, type: typeof result }
+          );
+          this.setState(({isError: true, result: errorMessage}));
+        }
+      }).catch(error => {
+        this.setState(({isError: true, result: error.message}));
+      })
+    } else {
+      this.setState(({isError: false, result: null}));
+    }
   }
 
   handleChangeExpression = value => this.setState(prevState => ({

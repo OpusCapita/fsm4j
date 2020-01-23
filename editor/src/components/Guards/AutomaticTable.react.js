@@ -26,7 +26,8 @@ export default class AutomaticTable extends PureComponent {
     title: PropTypes.string.isRequired,
     onClose: PropTypes.func.isRequired,
     onSave: PropTypes.func.isRequired,
-    componentsRegistry: PropTypes.objectOf(PropTypes.func)
+    componentsRegistry: PropTypes.objectOf(PropTypes.func),
+    expressionEvaluator: PropTypes.func,
   }
 
   static contextTypes = {
@@ -118,7 +119,7 @@ export default class AutomaticTable extends PureComponent {
 
   render() {
     const { i18n } = this.context;
-    const { title, conditions, componentsRegistry } = this.props;
+    const { title, conditions, componentsRegistry, expressionEvaluator } = this.props;
     const { guards, showEditor, currentGuardIndex } = this.state;
 
     let editorModal;
@@ -132,6 +133,7 @@ export default class AutomaticTable extends PureComponent {
 
       editorModal = (
         <GuardEditor
+          expressionEvaluator={expressionEvaluator}
           guard={guard}
           conditions={conditions}
           componentsRegistry={componentsRegistry}

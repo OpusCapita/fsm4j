@@ -30,7 +30,8 @@ export default class StatesTable extends PureComponent {
     conditions: PropTypes.objectOf(PropTypes.shape({
       paramsSchema: PropTypes.object
     })),
-    onSaveReleaseGuards: PropTypes.func.isRequired
+    onSaveReleaseGuards: PropTypes.func.isRequired,
+    expressionEvaluator: PropTypes.func
   }
 
   static contextTypes = {
@@ -124,7 +125,7 @@ export default class StatesTable extends PureComponent {
 
   render() {
     const { i18n } = this.context;
-    const { stateConfig, conditions, statesInTransitions } = this.props;
+    const { stateConfig, conditions, statesInTransitions, expressionEvaluator } = this.props;
     const { states, currentState, showModal, modalType } = this.state;
 
     const simpleReleaseGuards = ((stateConfig || {}).releaseGuards || {}).toState === 'all';
@@ -143,6 +144,7 @@ export default class StatesTable extends PureComponent {
           modal = simpleReleaseGuards ?
             (
               <Guards
+                expressionEvaluator={expressionEvaluator}
                 guards={
                   ((currentStateObject || {}).release || []).
                     reduce((acc, { to, guards }) => to === undefined ? [...acc, ...guards] : acc, [])
@@ -155,6 +157,7 @@ export default class StatesTable extends PureComponent {
             ) :
             (
               <ReleaseTable
+                expressionEvaluator={expressionEvaluator}
                 releaseGuards={(currentStateObject || {}).release}
                 title={i18n.getMessage('fsmWorkflowEditor.ui.states.releaseGuards.table.title', {
                   stateName: currentState

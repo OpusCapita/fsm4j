@@ -26,6 +26,7 @@ import translations from '../../i18n';
 export default class WorkflowEditor extends PureComponent {
   static propTypes = {
     onSave: PropTypes.func,
+    expressionEvaluator: PropTypes.func,
     title: PropTypes.string,
     workflow: PropTypes.shape({
       schema: PropTypes.shape({
@@ -287,7 +288,7 @@ export default class WorkflowEditor extends PureComponent {
 
   render() {
     const { i18n } = this.context;
-    const { title, workflow: { actions = {}, conditions = {} }, schemaConfig } = this.props;
+    const { title, workflow: { actions = {}, conditions = {} }, schemaConfig, expressionEvaluator } = this.props;
     const { schema } = this.state;
 
     return (
@@ -312,6 +313,7 @@ export default class WorkflowEditor extends PureComponent {
             >
               <Tab eventKey={1} title={(<h4>{i18n.getMessage('fsmWorkflowEditor.ui.states.label')}</h4>)}>
                 <StatesTable
+                  expressionEvaluator={expressionEvaluator}
                   states={schema.states || []}
                   statesInTransitions={
                     (schema.transitions || []).reduce(
@@ -334,6 +336,7 @@ export default class WorkflowEditor extends PureComponent {
               </Tab>
               <Tab eventKey={2} title={(<h4>{i18n.getMessage('fsmWorkflowEditor.ui.transitions.label')}</h4>)}>
                 <TransitionsTable
+                  expressionEvaluator={expressionEvaluator}
                   transitions={schema.transitions || []}
                   states={(schema.states || []).map(({ name }) => name)}
                   actions={actions}

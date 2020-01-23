@@ -3,13 +3,27 @@ package com.opuscapita.fsm
 import grails.converters.JSON
 
 class FsmEditorApiController {
-
-//    static allowedMethods = [
-//            edit : "GET",
-//            index: "GET"
-//    ]
-
     def fsmEditorService
+
+    def eval() {
+        Map vars = request.JSON as Map
+        String code = vars.code
+        Map arg = vars.arg
+
+        ClassLoader classLoader
+
+        GroovyShell groovyShell = new GroovyShell(classLoader, new Binding(arg))
+        def result
+        try {
+            result = groovyShell.evaluate(code)
+        } catch(Exception e) {
+            response.status = 500
+            render([result: e.message] as JSON)
+            return
+        }
+
+        render([result: result] as JSON)
+    }
 
     def history() {
         String objectId = params.objectId
