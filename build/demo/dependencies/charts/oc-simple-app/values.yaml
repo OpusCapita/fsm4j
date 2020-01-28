@@ -1,0 +1,51 @@
+# Default values for oc-simple-app.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: nginx
+  tag: stable
+  pullPolicy: Always
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+container:
+  env: []
+  args: []
+  httpPort: 8080
+
+ingress:
+  enabled: true
+
+  oauth2Proxy:
+    enabled: true
+
+  annotations: []
+  host: ""
+  path: /
+  tls: []
+
+resources:
+  requests:
+    memory: "2048Mi"
+  limits:
+    memory: "3072Mi"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+rollingRestart:
+  # restart pods on each "kubectl apply"/"helm upgrade"
+  enabled: true
+
+dockerSecret: dockerhub

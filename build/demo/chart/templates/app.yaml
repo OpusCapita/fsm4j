@@ -1,0 +1,158 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: app
+  labels:
+    app.kubernetes.io/name: app
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: {{ .Values.ingress.path }}/app$1
+    nginx.ingress.kubernetes.io/auth-signin: https://$host/oauth2/opuscapita-azuread/start?rd=$escaped_request_uri
+    nginx.ingress.kubernetes.io/auth-url: https://$host/oauth2/opuscapita-azuread/auth
+    nginx.ingress.kubernetes.io/proxy-body-size: 20m
+    cert-manager.io/cluster-issuer: "default"
+spec:
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.host }}-tls
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.path }}/app(/?.*)
+            backend:
+              serviceName: app
+              servicePort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  labels:
+    app.kubernetes.io/name: app
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app.kubernetes.io/name: app
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: app
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: app
+      annotations:
+        date: {{ now }} # RollingRestart workaround. https://github.com/kubernetes/kubernetes/issues/13488
+    spec:
+      # If possible, run application pod on the same node as MySQL database for this release.
+      # It insures minimal possible network latency between application and database, making initial startup as fast as possible.
+      # P. S. This is a soft requirement. If desired node is busy, application pod will be scheduled on a different node.
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                  - mysql
+              topologyKey: kubernetes.io/hostname
+      initContainers:
+      - name: wait-for-mysql
+        image: mysql:5.7
+        imagePullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          {{- with (index .Values.database .Values.database.mode "connection" ) }}
+          - |
+            until printf "." && mysqlshow -h {{ .host }} -u{{ .user }} -p{{ .password }} {{ .name }} >/dev/null; do
+              sleep 10;
+            done;
+          {{- end }}
+      containers:
+      - name: minsk-core-demo
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: Always
+        env:
+        - name: JAVA_OPTS
+          value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Xms2048m -Xmx3072m"
+        args:
+          - --java-opts=-Xms2048m -Xmx2048m -XX:+PrintFlagsFinal -XX:NativeMemoryTracking="summary"
+          - --context-path={{ .Values.ingress.path }}/app
+          - --configuration-properties=/etc/minsk-core-demo/configuration.properties
+        ports:
+        - containerPort: 8080
+          name: app
+        resources:
+          requests:
+            memory: "2048Mi"
+          limits:
+            memory: "3072Mi"
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.ingress.path }}/app/api/health/ready
+            port: 8080
+          periodSeconds: 5
+          timeoutSeconds: 240
+          failureThreshold: 12
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.ingress.path }}/app/api/health/alive
+            port: 8080
+          periodSeconds: 5
+          timeoutSeconds: 240
+          initialDelaySeconds: 120
+          failureThreshold: 12
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/minsk-core-demo
+      volumes:
+      - name: config-volume
+        configMap:
+          name: app-config
+      imagePullSecrets:
+        - name: dockerhub
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  configuration.properties: |
+    jcatalog.application.url = {{ printf "https://%s%s" .Values.ingress.host .Values.ingress.path }}/app
+    {{- with (index .Values.database .Values.database.mode "connection" ) }}
+    jcatalog.db.url = jdbc:mysql://{{ .host }}:3306/{{ .name }}
+    jcatalog.db.user = {{ .user }}
+    jcatalog.db.password = {{ .password }}
+    {{- end }}
+    jcatalog.db.populateDatabase = demo
+    jcatalog.db.hibernate.dialect = com.jcatalog.util.database.CustomMySQL5InnoDBDialect
+    jcatalog.db.driver = com.mysql.jdbc.Driver
+    jcatalog.customizationArea.root = /var/customizationarea
+    opuscapita.configurationArea.root = /var/configurationarea
+    jcatalog.workarea.root = /var/workarea
+    jcatalog.mail.smtpHost = mailserver
+    jcatalog.mail.smtpPort = 25
+    jcatalog.mail.smtpUsername =
+    jcatalog.mail.smtpPassword =
+    jcatalog.mail.smtpProperties =
+    jcatalog.mail.from = support@opuscapita.com

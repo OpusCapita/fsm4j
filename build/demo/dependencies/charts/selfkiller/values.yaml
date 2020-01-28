@@ -1,0 +1,10 @@
+azureAks:
+  resourceGroup: ''
+  clusterName: ''
+image:
+  repository: ''
+  tag: ''
+github:
+  project: ''
+  branch: ''
+dockerSecret: "dockerhub"

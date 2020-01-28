@@ -6,3 +6,10 @@ target/
 *.iml
 *.ipr
 *.iws
+
+# plugin release files
+*.zip
+*.zip.sha1
+plugin.xml
+
+demo/server/web-app/js

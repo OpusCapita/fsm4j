@@ -1,0 +1,11 @@
+webhook: ''
+github:
+  ref: ''
+  project: ''
+  branch: ''
+  user: ''
+ci:
+  jobUrl: ''
+link:
+  title: 'demo'
+  url: ''

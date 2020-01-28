@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: github-notify-deploy-job
+  # annotations:
+  #   "helm.sh/hook": post-install,post-upgrade
+  #   "helm.sh/hook-weight": "-5"
+  #   "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      name: github-notify-deploy-job
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: github-status-deployment-link
+        image: "alpine/httpie:3.5-0.9.9"
+        command: ["/bin/sh"]
+        args: ["-c", 'http -v --ignore-stdin --auth {{ .Values.github.user }}:{{ .Values.github.password }} POST https://api.github.com/repos/{{ .Values.github.project }}/statuses/{{ .Values.github.ref }} state="success" target_url="{{ .Values.url }}" description="Click Details link to open" context="deployment"']
+        resources:
+          requests:
+            memory: 24Mi
+            cpu: 100m
+          limits:
+            memory: 32Mi
+            cpu: 200m

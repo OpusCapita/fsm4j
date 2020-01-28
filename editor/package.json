@@ -10,8 +10,7 @@
   "license": "Apache-2.0",
   "repository": "OpusCapita/fsm/tree/master/packages/editor",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
+    "registry": "https://opuscapita.jfrog.io/opuscapita/api/npm/npm/"
   },
   "homepage": "https://github.com/OpusCapita/fsm-workflow/tree/master/packages/editor#readme",
   "keywords": [

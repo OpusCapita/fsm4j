@@ -33,8 +33,6 @@ grails.project.dependency.resolution = {
             export = false
         }
 
-        runtime (':platform-core:1.0.RC6-jcatalog-20150611')
-
         runtime ':hibernate:3.6.10.18'
         test 'com.jcatalog.grailsplugins:jcatalog-db-migration:7.21.GA.2'
 

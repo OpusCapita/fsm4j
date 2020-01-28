@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: syncer-cfgmap
+  annotations:
+    "description": "Sync secrets"
+data:
+  syncer.sh: |-
+    #!/bin/sh
+    set -euo pipefail
+    for arg
+    do
+      echo $arg
+      kubectl get secret $arg --namespace=lunar-system --export -o yaml | kubectl apply --namespace=$(</var/run/secrets/kubernetes.io/serviceaccount/namespace) -f -
+    done
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: syncer-job
+spec:
+  schedule: "0 */3 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 600
+      template:
+        spec:
+          containers:
+          - name: syncer-job
+            imagePullPolicy: Always
+            image: lachlanevenson/k8s-kubectl:v1.13.2
+            command: ["/bin/syncer.sh"]
+            args:
+              {{- range .Values.secrets }}
+              - {{ . }}
+              {{- end }}
+            volumeMounts:
+            - name: syncer-v
+              mountPath: /bin/syncer.sh
+              readOnly: true
+              subPath: syncer.sh
+
+          restartPolicy: Never
+
+          volumes:
+          - name: syncer-v
+            configMap:
+              defaultMode: 0700
+              name: syncer-cfgmap

@@ -1,0 +1,71 @@
+{{- $id := printf "%s-%s" "slack-notify" .Release.Name  | trunc 45 | lower -}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $id }}-hpipu
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      name: "{{ .Release.Name }}"
+      labels:
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: slack-notify-deploy-upgrade
+        image: "byrnedo/alpine-curl:latest"
+        args: ["-X", "POST", "-H", "'Content-type: application/json'", "--data", '{"attachments":[{"fallback":"Installed/upgraded Helm release {{ .Release.Name }}","pretext":"Installed/upgraded Helm release","author_name":"{{ .Values.github.user }}","author_link":"https://github.com/{{ .Values.github.user }}","author_icon":"https://avatars.githubusercontent.com/{{ .Values.github.user }}?s=40&v=4","title":"{{ .Values.github.project }}/{{ .Values.github.branch }}","title_link":"https://github.com/{{ .Values.github.project }}/tree/{{ .Values.github.branch }}","fields":[{"title":"Helm release","value":"Name: {{ .Release.Name }}, Revision: {{ .Release.Revision }}, Namespace: {{ .Release.Namespace }}"}]},{"fallback":"{{ .Values.link.url }}","title":"{{ .Values.link.title }}","title_link":"{{ .Values.link.url }}"},{"fallback":"CI Job: {{ .Values.ci.jobUrl }}","title":"CI Job","title_link":"{{ .Values.ci.jobUrl }}"},{"fallback":"Commit: {{ .Values.github.ref }}","title":"Commit","title_link":"https://github.com/{{ .Values.github.project }}/commit/{{ .Values.github.ref }}"}]}', "{{ .Values.webhook }}"]
+        resources:
+          requests:
+            memory: 24Mi
+            cpu: 100m
+          limits:
+            memory: 32Mi
+            cpu: 200m
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $id }}-hpd
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      name: "{{ .Release.Name }}"
+      labels:
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: slack-notify-delete
+        image: "byrnedo/alpine-curl:latest"
+        args: ["-X", "POST", "-H", "'Content-type: application/json'", "--data", '{"attachments":[{"fallback":"Deleted Helm release {{ .Release.Name }}","pretext":"Deleted Helm release","title":"{{ .Values.github.project }}/{{ .Values.github.branch }}","title_link":"https://github.com/{{ .Values.github.project }}/tree/{{ .Values.github.branch }}","fields":[{"title":"Helm release","value":"Name: {{ .Release.Name }}, Revision: {{ .Release.Revision }}, Namespace: {{ .Release.Namespace }}"}]}]}', "{{ .Values.webhook }}"]
+        resources:
+          requests:
+            memory: 24Mi
+            cpu: 100m
+          limits:
+            memory: 32Mi
+            cpu: 200m

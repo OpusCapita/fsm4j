@@ -1,0 +1,98 @@
+{{- $id := printf "%s-%s" "selfkiller" .Release.Name  | trunc 45 | lower -}}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $id }}-cfgmap
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "description": "Selfkiller script. Checks Github branch; if it's deleted then deletes current release."
+data:
+  selfkiller-script.sh: |-
+    #!/usr/bin/env bash
+    . /machineuser-vault/shell-env
+
+    branchStatus=$(/bin/scripts/check-github-branch.sh $GH_PROJECT $GH_BRANCH)
+
+    if [ $branchStatus == 'deleted' ]; then
+      /bin/scripts/login/aks-login.sh ${AZURE_AKS_RESOURCE_GROUP} ${AZURE_AKS_CLUSTER_NAME}
+      kubectl -n ${RELEASE_NAMESPACE} delete jobs -l release=${RELEASE_NAME}
+
+      /bin/scripts/delete-docker-tags.sh ${DOCKER_REPO}:${DOCKER_TAG}
+      /bin/scripts/delete-helm-release-from-aks.sh ${AZURE_AKS_RESOURCE_GROUP} ${AZURE_AKS_CLUSTER_NAME} ${RELEASE_NAME}
+    fi
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ $id }}-job
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "description": "Cronjob which deletes current release if corresponding Github branch was deleted."
+spec:
+  schedule: "@hourly"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    metadata:
+      labels:
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 600
+      template:
+        spec:
+          containers:
+          - name: {{ $id }}-job
+            imagePullPolicy: Always
+            image: opuscapita/minsk-core-ci:grails-2.4.4-jdk-8u131-nodejs-8.9.4-maven-3.3.9
+            command: ["/bin/selfkiller-script.sh"]
+
+            env:
+            - name: GH_PROJECT
+              value: "{{ .Values.github.project }}"
+            - name: GH_BRANCH
+              value: "{{ .Values.github.branch }}"
+            - name: RELEASE_NAME
+              value: "{{ .Release.Name }}"
+            - name: RELEASE_NAMESPACE
+              value: "{{ .Release.Namespace }}"
+            - name: DOCKER_REPO
+              value: "{{ .Values.image.repository }}"
+            - name: DOCKER_TAG
+              value: "{{ .Values.image.tag }}"
+            - name: AZURE_AKS_RESOURCE_GROUP
+              value: "{{ .Values.azureAks.resourceGroup }}"
+            - name: AZURE_AKS_CLUSTER_NAME
+              value: "{{ .Values.azureAks.clusterName }}"
+
+            volumeMounts:
+            - name: machineuser-vault
+              mountPath: /machineuser-vault
+              readOnly: true
+            - name: {{ $id }}-v
+              mountPath: /bin/selfkiller-script.sh
+              readOnly: true
+              subPath: selfkiller-script.sh
+
+          restartPolicy: Never
+
+          volumes:
+          - name: machineuser-vault
+            secret:
+              secretName: machineuser-vault-master-secret
+          - name: {{ $id }}-v
+            configMap:
+              defaultMode: 0700
+              name: {{ $id }}-cfgmap
+
+          imagePullSecrets:
+            - name: {{ .Values.dockerSecret }}
