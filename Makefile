@@ -97,7 +97,6 @@ build: build-client-demo
 deploy: test build-client-demo
 	cd core && mvn -Dmaven.test.skip deploy
 	cd history && grails maven-deploy -Dgrails.env=prod -verbose
-	cd editor && npm run publish-release
 	cd demo/server && grails maven-deploy -Dgrails.env=prod -verbose
 
 .PHONY: docker-auth
