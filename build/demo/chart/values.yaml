@@ -4,20 +4,3 @@ image:
 ingress:
   path: ""
   host: ""
-database:
-  # auto | local
-  mode: auto
-
-  auto:
-    connection:
-      host: rdbms.mysql
-      name: ""
-      user: ocadmin
-      password: ocadmin
-
-  local:
-    connection:
-      host: mysql
-      name: db
-      user: ocadmin
-      password: ocadmin

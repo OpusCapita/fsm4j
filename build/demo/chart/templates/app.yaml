@@ -7,7 +7,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: {{ .Values.ingress.path }}/app$1
+    nginx.ingress.kubernetes.io/rewrite-target: {{ .Values.ingress.path }}$1
     nginx.ingress.kubernetes.io/auth-signin: https://$host/oauth2/opuscapita-azuread/start?rd=$escaped_request_uri
     nginx.ingress.kubernetes.io/auth-url: https://$host/oauth2/opuscapita-azuread/auth
     nginx.ingress.kubernetes.io/proxy-body-size: 20m
@@ -21,7 +21,7 @@ spec:
     - host: {{ .Values.ingress.host }}
       http:
         paths:
-          - path: {{ .Values.ingress.path }}/app(/?.*)
+          - path: {{ .Values.ingress.path }}(/?.*)
             backend:
               serviceName: app
               servicePort: 80
@@ -75,47 +75,34 @@ spec:
                   values:
                   - mysql
               topologyKey: kubernetes.io/hostname
-      initContainers:
-      - name: wait-for-mysql
-        image: mysql:5.7
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          {{- with (index .Values.database .Values.database.mode "connection" ) }}
-          - |
-            until printf "." && mysqlshow -h {{ .host }} -u{{ .user }} -p{{ .password }} {{ .name }} >/dev/null; do
-              sleep 10;
-            done;
-          {{- end }}
       containers:
       - name: fsm-workflow-jvm
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
         env:
         - name: JAVA_OPTS
-          value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Xms2048m -Xmx3072m"
+          value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Xms1024m -Xmx1024m"
         args:
           - --java-opts=-Xms2048m -Xmx2048m -XX:+PrintFlagsFinal -XX:NativeMemoryTracking="summary"
-          - --context-path={{ .Values.ingress.path }}/app
+          - --context-path={{ .Values.ingress.path }}
         ports:
         - containerPort: 8080
           name: app
         resources:
           requests:
-            memory: "2048Mi"
+            memory: "1024Mi"
           limits:
-            memory: "3072Mi"
+            memory: "1532Mi"
         readinessProbe:
           httpGet:
-            path: {{ .Values.ingress.path }}/app/api/health/ready
+            path: {{ .Values.ingress.path }}/api/health/ready
             port: 8080
           periodSeconds: 5
           timeoutSeconds: 240
           failureThreshold: 12
         livenessProbe:
           httpGet:
-            path: {{ .Values.ingress.path }}/app/api/health/alive
+            path: {{ .Values.ingress.path }}/api/health/alive
             port: 8080
           periodSeconds: 5
           timeoutSeconds: 240
@@ -124,14 +111,5 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: /etc/fsm-workflow-jvm
-      volumes:
-      - name: config-volume
-        configMap:
-          name: app-config
       imagePullSecrets:
         - name: dockerhub
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: app-config
