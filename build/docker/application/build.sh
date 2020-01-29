@@ -8,9 +8,9 @@ script_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 git_repo_dir=$( git rev-parse --show-toplevel )
 
-app_name=$( properties get --file $git_repo_dir/application.properties --key app.name )
+app_name=$( properties get --file $git_repo_dir/demo/server/application.properties --key app.name )
 
-app_version=$( properties get --file $git_repo_dir/application.properties --key app.version )
+app_version=$( properties get --file $git_repo_dir/demo/server/application.properties --key app.version )
 
 docker_repository="$( . $script_dir/../get-docker-repository.sh )"
 
