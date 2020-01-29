@@ -108,8 +108,5 @@ spec:
           timeoutSeconds: 240
           initialDelaySeconds: 120
           failureThreshold: 12
-        volumeMounts:
-        - name: config-volume
-          mountPath: /etc/fsm-workflow-jvm
       imagePullSecrets:
         - name: dockerhub
