@@ -62,7 +62,6 @@ jobs:
       - setup_remote_docker
       - run: make build-docker
       - run: make publish-docker
-      - run: make cleanup-cache
       - save_cache: *save_cache
 
   deploy-demo:
