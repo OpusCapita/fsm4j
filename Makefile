@@ -96,8 +96,8 @@ build: build-client-demo
 .PHONY: deploy
 deploy: test build-client-demo
 	cd core && mvn -Dmaven.test.skip deploy
-	cd history && grails maven-deploy -Dgrails.env=prod -verbose
-	cd demo/server && grails maven-deploy -Dgrails.env=prod -verbose
+	cd history && grails refresh-dependencies && grails maven-deploy -Dgrails.env=prod -verbose --offline
+	cd demo/server && grails refresh-dependencies && grails maven-deploy -Dgrails.env=prod -verbose --offline
 
 .PHONY: docker-auth
 docker-auth: ## Login to Dockerhub
