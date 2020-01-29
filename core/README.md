@@ -59,11 +59,11 @@ def schema = [
   <dd>predefined named actions, <i>todo</i> describe more how action is declared (name, arguments), how its call is defined (explicit/implicit parameters)
   </dd>
 
-  <dt>guards</dt>
-  <dd>conditions that could be checked/called from outside the FSM to take a decision if transition should be executed automatically, <i>todo</i> describe/define in detail</dd>
+  <dt>conditions</dt>
+  <dd>???</dd>
 
-  <dt>autos</dt>
-  <dd>conditions specified in schema that gives possibility to application (external task manager) possibility to determine whether event should/could be sent automatically, <i>todo</i> describe/define in detail</dd>
+  <dt>objectConfiguration</dt>
+  <dd>???</dd>
 </dl>
 
 
@@ -73,7 +73,7 @@ def schema = [
 import com.opuscapita.fsm.Machine
 import com.opuscapita.fsm.MachineDefinition
 
-def machineDefinition = new MachineDefinition([[schema: schema], actions: actions])
+def machineDefinition = new MachineDefinition([schema: schema, actions: actions])
 // register workflow
 def machine = new Machine([machineDefinition: machineDefinition, context:context]);
 

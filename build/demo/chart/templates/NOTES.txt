@@ -1,2 +1,1 @@
 Application URL: https://{{ .Values.ingress.host }}{{ .Values.ingress.path }}/app
-Mail service URL: https://{{ .Values.ingress.host }}{{ .Values.ingress.path }}/mail

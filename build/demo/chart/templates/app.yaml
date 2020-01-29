@@ -89,7 +89,7 @@ spec:
             done;
           {{- end }}
       containers:
-      - name: minsk-core-demo
+      - name: fsm-workflow-jvm
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
         env:
@@ -98,7 +98,6 @@ spec:
         args:
           - --java-opts=-Xms2048m -Xmx2048m -XX:+PrintFlagsFinal -XX:NativeMemoryTracking="summary"
           - --context-path={{ .Values.ingress.path }}/app
-          - --configuration-properties=/etc/minsk-core-demo/configuration.properties
         ports:
         - containerPort: 8080
           name: app
@@ -124,7 +123,7 @@ spec:
           failureThreshold: 12
         volumeMounts:
         - name: config-volume
-          mountPath: /etc/minsk-core-demo
+          mountPath: /etc/fsm-workflow-jvm
       volumes:
       - name: config-volume
         configMap:
@@ -136,23 +135,3 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: app-config
-data:
-  configuration.properties: |
-    jcatalog.application.url = {{ printf "https://%s%s" .Values.ingress.host .Values.ingress.path }}/app
-    {{- with (index .Values.database .Values.database.mode "connection" ) }}
-    jcatalog.db.url = jdbc:mysql://{{ .host }}:3306/{{ .name }}
-    jcatalog.db.user = {{ .user }}
-    jcatalog.db.password = {{ .password }}
-    {{- end }}
-    jcatalog.db.populateDatabase = demo
-    jcatalog.db.hibernate.dialect = com.jcatalog.util.database.CustomMySQL5InnoDBDialect
-    jcatalog.db.driver = com.mysql.jdbc.Driver
-    jcatalog.customizationArea.root = /var/customizationarea
-    opuscapita.configurationArea.root = /var/configurationarea
-    jcatalog.workarea.root = /var/workarea
-    jcatalog.mail.smtpHost = mailserver
-    jcatalog.mail.smtpPort = 25
-    jcatalog.mail.smtpUsername =
-    jcatalog.mail.smtpPassword =
-    jcatalog.mail.smtpProperties =
-    jcatalog.mail.from = support@opuscapita.com

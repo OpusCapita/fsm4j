@@ -16,6 +16,9 @@ class UrlMappings {
         "/api/states"(controller: "fsmEditorApi", action: "states", method: "GET")
         "/api/eval"(controller: "fsmEditorApi", action: "eval", method: "POST")
 
+        "/api/health/alive"(controller: "health", action: "alive", method: "GET")
+        "/api/health/ready"(controller: "health", action: "ready", method: "GET")
+
         "/"(view: "/index")
         "500"(view: '/error')
     }
