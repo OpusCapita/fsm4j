@@ -94,11 +94,10 @@ build: build-client-demo
 	cd demo/server && grails war
 
 .PHONY: deploy
-deploy: test
+deploy: test build-client-demo
 	cd core && mvn -Dmaven.test.skip deploy
 	cd history && grails maven-deploy -Dgrails.env=prod -verbose
 	cd editor && npm run publish-release
-	cd demo/client && npm run demo:build
 	cd demo/server && grails maven-deploy -Dgrails.env=prod -verbose
 
 .PHONY: docker-auth
