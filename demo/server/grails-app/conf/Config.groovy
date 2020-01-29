@@ -1,16 +1,4 @@
-import grails.util.GrailsUtil
-import grails.util.Holders
-import org.springframework.context.ApplicationContext
-import org.springframework.context.i18n.LocaleContextHolder
-
-grails.doc.title = 'Provisioning Manager'
-grails.doc.subtitle = 'The main purpose of the provisioning manager is to provision different types of rights and roles to a user of the application.'
-grails.doc.authors = 'Alexey Sergeev (Alexey.Sergeev@opuscapita.com), Dmitry Divin (Dmitry.Divin@opuscapita.com) and Daniel Zhitomirsky (Daniel.Zhitomirsky@opuscapita.com)'
-grails.doc.license = 'OpusCapita Software AG'
-grails.doc.copyright = "© 2000-${Calendar.getInstance().get(Calendar.YEAR)} <a href='http://www.opuscapita.com/' target='_blank'>OpusCapita Software AG</a>"
-grails.doc.footer = '<p>Please contact the authors with any corrections or suggestions</p>'
-
-grails.project.groupId = "com.jcatalog.prov"
+grails.project.groupId = "com.opuscapita.fsm.demo"
 
 naming_strategy = 'org.hibernate.cfg.DefaultNamingStrategy'
 
@@ -53,12 +41,6 @@ grails.logging.jul.usebridge = true
 grails.spring.bean.packages = []
 /* runtime reloadable gsp pages */
 grails.gsp.enable.reload = true
-plugin.platformCore.show.startup.info = false
-plugin.platformCore.site.name = 'PROV'
-
-plugin.platformCore.events.disabled = true
-plugin.platformCore.events.gorm.disabled = true
-plugin.platformCore.navigation.disabled = true
 
 grails.databinding.useSpringBinder = true
 
