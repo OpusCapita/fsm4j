@@ -50,7 +50,7 @@ ls -la "$CATALINA_HOME/webapps"
 #
 #####################################################################
 
-COMMON_JAVA_OPTS="-verbose:gc -XX:+PrintGCDetails -Xloggc:$CATALINA_HOME/logs/gc.log -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+PrintGCApplicationConcurrentTime -XX:+PrintGCApplicationStoppedTime -XX:+HeapDumpOnOutOfMemoryError -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Xms2g -Xmx2g -XX:MaxMetaspaceSize=1024m -XX:ReservedCodeCacheSize=256m -XX:+UseCodeCacheFlushing -Djavax.xml.transform.TransformerFactory=net.sf.saxon.TransformerFactoryImpl -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -XX:+UseG1GC"
+COMMON_JAVA_OPTS="-verbose:gc -XX:+PrintGCDetails -Xloggc:$CATALINA_HOME/logs/gc.log -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+PrintGCApplicationConcurrentTime -XX:+PrintGCApplicationStoppedTime -XX:+HeapDumpOnOutOfMemoryError -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Xms2g -Xmx2g -XX:MaxMetaspaceSize=1024m -XX:ReservedCodeCacheSize=256m -XX:+UseCodeCacheFlushing -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -XX:+UseG1GC"
 
 # Make sure to pass $JAVA_OPTS in the end to make it rewriteable
 JAVA_OPTS=`printf "%s %s" "$COMMON_JAVA_OPTS" "$EXTRA_JAVA_OPTS"`
