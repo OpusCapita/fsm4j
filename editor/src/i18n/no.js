@@ -92,7 +92,7 @@ export const guards = {
   negate: {
     label: 'Ugyldiggjør'
   },
-  expressionTypeName: 'JavaScript-uttrykk',
+  expressionTypeName: 'Groovy-uttrykk',
   emptyList: 'Ingen vakter spesifisert for denne overgangen.',
   addNewCallout: 'Legg til ny!',
   deleteDialog: {
@@ -111,12 +111,12 @@ export const guards = {
     },
     expression: {
       label: 'Uttrykk',
-      placeholder: 'Angi JavaScript-kode her',
+      placeholder: 'Angi Groovy-kode her',
       results: 'Resultater',
       autoplay: 'Kjør automatisk',
       exampleObject: {
         label: 'Eksempelobjekt',
-        hint: 'Klikk en egenskap for å sette inn referansen dens i JavaScript Expression-redigeringsprogrammet.'
+        hint: 'Klikk en egenskap for å sette inn referansen dens i Groovy Expression-redigeringsprogrammet.'
       }
     }
   }

@@ -92,7 +92,7 @@ export const guards = {
   negate: {
     label: 'Kiellä'
   },
-  expressionTypeName: 'JavaScript-lauseke',
+  expressionTypeName: 'Groovy-lauseke',
   emptyList: 'Tälle siirtymälle ei ole määritelty suojia.',
   addNewCallout: 'Lisää uusi!',
   deleteDialog: {
@@ -111,12 +111,12 @@ export const guards = {
     },
     expression: {
       label: 'Ilmaisu',
-      placeholder: 'Syötä tässä JavaScript-koodi',
+      placeholder: 'Syötä tässä Groovy-koodi',
       results: 'Tulokset',
       autoplay: 'Automaattinen toisto',
       exampleObject: {
         label: 'Esimerkkiobjekti',
-        hint: 'Napsauta ominaisuutta, jonka viitteen haluat lisätä JavaScript-lausekkeen editoriin.'
+        hint: 'Napsauta ominaisuutta, jonka viitteen haluat lisätä Groovy-lausekkeen editoriin.'
       }
     }
   }

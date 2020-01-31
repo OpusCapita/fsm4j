@@ -1,0 +1,1 @@
+log.info("Action [testAction] with args ${args}")

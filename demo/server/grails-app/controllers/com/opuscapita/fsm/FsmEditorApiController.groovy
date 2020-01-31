@@ -1,9 +1,27 @@
 package com.opuscapita.fsm
 
+import com.opuscapita.log4j.appender.InMemoryAppender
 import grails.converters.JSON
+import org.apache.log4j.Logger
+import org.apache.log4j.PatternLayout
+import org.apache.log4j.spi.LoggingEvent
+
 
 class FsmEditorApiController {
     def fsmEditorService
+
+    def logEvents() {
+        PatternLayout layout = new PatternLayout("%d %-5p - %m%n")
+        Logger logger = Logger.getLogger(FsmEditorService)
+        InMemoryAppender appender = logger.getAppender("memory")
+
+        long offsetTimeStamp = params.long("offset", 0L)
+        List<LoggingEvent> events = appender.getLogEvens(offsetTimeStamp)
+
+        Long offset = (events.collect {it.timeStamp} + [offsetTimeStamp]).max()
+
+        render([events: events.collect {layout.format(it)}, offset: offset] as JSON)
+    }
 
     def eval() {
         Map vars = request.JSON as Map

@@ -15,6 +15,7 @@ class UrlMappings {
         "/api/event"(controller: "fsmEditorApi", action: "sendEvent", method: "POST")
         "/api/states"(controller: "fsmEditorApi", action: "states", method: "GET")
         "/api/eval"(controller: "fsmEditorApi", action: "eval", method: "POST")
+        "/api/logEvents"(controller: "fsmEditorApi", action: "logEvents", method: "GET")
 
         "/api/health/alive"(controller: "health", action: "alive", method: "GET")
         "/api/health/ready"(controller: "health", action: "ready", method: "GET")

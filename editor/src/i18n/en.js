@@ -92,7 +92,7 @@ export const guards = {
   negate: {
     label: 'Negate'
   },
-  expressionTypeName: 'JavaScript Expression',
+  expressionTypeName: 'Groovy Expression',
   emptyList: 'No guards specified for this transition.',
   addNewCallout: 'Add new!',
   deleteDialog: {
@@ -111,12 +111,12 @@ export const guards = {
     },
     expression: {
       label: 'Expression',
-      placeholder: 'Enter JavaScript code here',
+      placeholder: 'Enter Groovy code here',
       results: 'Results',
       autoplay: 'Autoplay',
       exampleObject: {
         label: 'Example object',
-        hint: 'Click on a property to insert its reference into JavaScript Expression editor.'
+        hint: 'Click on a property to insert its reference into Groovy Expression editor.'
       }
     }
   }

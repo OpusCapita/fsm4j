@@ -1,116 +1,116 @@
 package com.opuscapita.fsm
 
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import groovy.util.logging.Log4j
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
+
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReadWriteLock
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 /**
  * Demo FSM editor
  *
  * @author Dmitry Divin
  */
-class FsmEditorService {
+@Log4j
+class FsmEditorService implements ApplicationContextAware {
     def workflowTransitionHistoryService
 
-    private Map internalSchema
+    private ReadWriteLock schemaReadWriteLock = new ReentrantReadWriteLock()
+    private Lock schemaReadLock = schemaReadWriteLock.readLock()
+    private Lock schemaWriteLock = schemaReadWriteLock.writeLock()
 
-    private getJSONFromClassPath(String resourceName) {
-        new JsonSlurper().parse(getClass().classLoader.getResourceAsStream(resourceName))
+
+    ApplicationContext applicationContext
+
+    private File getConfigurationRootFile() {
+        //get servlet context resource
+        applicationContext.getResource("WEB-INF/configuration").file
+    }
+
+    private Map getJSONFromConfiguration(String filePath) {
+        new JsonSlurper().parse(new File(configurationRootFile, filePath))
+    }
+
+    private Closure getConditionFromConfiguration(String filePath) {
+        File groovyFile = new File(configurationRootFile, filePath)
+        assert groovyFile.exists(), "File [${filePath}] doesn't exists"
+
+        return { args ->
+            GroovyShell groovyShell = new GroovyShell(applicationContext.classLoader, new Binding([
+                    args: args,
+                    log : log
+            ]))
+
+            return groovyShell.evaluate(groovyFile)
+        }
+    }
+
+    private List getConditionItems(String filePath) {
+        new File(configurationRootFile, filePath).listFiles({ File dir, String name ->
+            String nameWithoutExt = name.lastIndexOf('.').with { it != -1 ? name[0..<it] : name }
+            return name == "${nameWithoutExt}.groovy" && new File(dir, "${nameWithoutExt}.schema.json").exists()
+        } as FilenameFilter).collect {
+            String name = it.name
+            return name.lastIndexOf('.').with { it != -1 ? name[0..<it] : name }
+        }
     }
 
     Map getSchema() {
-        if (internalSchema == null) {
-            internalSchema = getJSONFromClassPath("com/opuscapita/fsm/default-schema.json")
+        schemaReadLock.lock()
+        try {
+            getJSONFromConfiguration("schema.json")
+        } catch (ignore) {
+            getJSONFromConfiguration("default-schema.json")
+        } finally {
+            schemaReadLock.unlock()
         }
-        return internalSchema
     }
 
     void setSchema(Map updatedSchema) {
-        internalSchema = updatedSchema
+        schemaWriteLock.lock()
+        try {
+            new File(configurationRootFile, "schema.json").withWriter {
+                it << JsonOutput.toJson(updatedSchema)
+            }
+        } finally {
+            schemaWriteLock.unlock()
+        }
     }
 
     Map getObjectConfiguration() {
-        getJSONFromClassPath("com/opuscapita/fsm/objectConfiguration.json")
+        getJSONFromConfiguration("objectConfiguration.json")
     }
 
     Map getConditions() {
-        [
-                'userHasRoles': [
-                        'paramsSchema': [
-                                'properties': [
-                                        'restrictedRoles': ['items': ['enum': ['REV', 'BOSS'], 'type': 'string'], 'type': 'array']],
-                                'type'      : 'object'
-                        ], expression : "return true"
-                ]
-        ]
+        getConditionItems("conditions").collectEntries {
+            [it, [
+                    'paramsSchema': getJSONFromConfiguration("conditions/${it}.schema.json")
+            ]]
+        }
     }
 
     Map getActions() {
-        [
-                'sendMail'         : [
-                        'paramsSchema': [
-                                'properties': [
-                                        'expiryDate' : ['format': 'date', 'type': 'string'],
-                                        'fromAddress': ['type': 'string'],
-                                        'greeting'   : ['type': 'string'],
-                                        'interest'   : ['type': 'number'],
-                                        'language'   : ['enum': ['en', 'de', 'fi', 'ru', 'sv', 'no'], 'type': 'string'],
-                                        'maxRetries' : ['type': 'integer'],
-                                        'priority'   : ['enum': [0, 1, 2, 3, 4, 5], 'type': 'integer'],
-                                        'sendCopy'   : ['type': 'boolean']],
-                                'required'  : ['fromAddress', 'greeting'],
-                                'type'      : 'object'
-                        ], expression : "return true"
-                ],
-                'testAction'       : [
-                        'paramsSchema': [
-                                'properties': [
-                                        'adult'                 : ['type': 'boolean'],
-                                        'age'                   : ['type': 'integer'],
-                                        'bankAccountBalance'    : ['type': 'number'],
-                                        'children'              : ['enum': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 'type': 'integer'],
-                                        'confidenceRate'        : ['enum': [15.75, 44.55, 66.7, 99999.9], 'type': 'number'],
-                                        'dateOfBirth'           : ['format': 'date', 'type': 'string'],
-                                        'dinnerMenu'            : ['items': ['enum': ['Steak', 'Vegetables', 'Mashrooms', 'Beer'], 'type': 'string'], 'type': 'array'],
-                                        'favoriteColor'         : ['enum': ['red', 'green', 'blue', 'yellow', 'I\'m achromate'], 'type': 'string'],
-                                        'fullName'              : ['type': 'string', 'uiComponent': 'fullName'],
-                                        'importantDates'        : ['items': ['format': 'date', 'type': 'string'], 'type': 'array'],
-                                        'monthlyInterestHistory': ['items': ['type': 'number'], 'type': 'array'],
-                                        'nextLotteryNumbers'    : ['items': ['type': 'integer'], 'type': 'array'],
-                                        'nickname'              : ['type': 'string'],
-                                        'todoList'              : ['items': ['type': 'string'], 'type': 'array']],
-                                'type'      : 'object'
-                        ], expression : "return true"
-                ],
-                'updateProcessedBy': [
-                        'paramsSchema': [
-                                'properties': ['processedByFieldName': ['type': 'string']],
-                                'required'  : ['processedByFieldName'],
-                                'type'      : 'object'
-                        ], expression : "return true"
-                ]
-        ]
+        getConditionItems("actions").collectEntries {
+            [it, [
+                    'paramsSchema': getJSONFromConfiguration("actions/${it}.schema.json")
+            ]]
+        }
     }
 
     Machine getMachine() {
         MachineDefinition machineDefinition = new MachineDefinition([
                 schema             : schema,
                 objectConfiguration: objectConfiguration,
-                conditions         : [
-                        userHasRoles: { args ->
-                            log.info("Condition [userHasRoles] with args [${args}]")
-                            return true
-                        }
-                ],
-                actions            : [
-                        sendMail         : { args ->
-                            log.info("Action [sendMail] with args [${args}]")
-                        },
-                        testAction       : { args ->
-                            log.info("Action [testAction] with args [${args}]")
-                        },
-                        updateProcessedBy: { args ->
-                            log.info("Action [updateProcessedBy] with args [${args}]")
-                        },
-                ]
+                conditions         : getConditionItems("conditions").collectEntries {
+                    [it, getConditionFromConfiguration("conditions/${it}.groovy")]
+                },
+                actions            : getConditionItems("actions").collectEntries {
+                    [it, getConditionFromConfiguration("actions/${it}.groovy")]
+                }
         ])
 
         Machine machine = new Machine([

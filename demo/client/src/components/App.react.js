@@ -6,6 +6,7 @@ import { uiMessageNotifications } from '../uiGlobalComponents';
 import Menu from './Menu.react';
 import HomePage from './HomePage.react';
 import Editor from './Editor.react';
+import Logs from './Logs.react';
 import WorkflowHistory from './History.react';
 import { notificationSuccess, notificationError } from '../constants';
 import { baseUrl } from '../utils';
@@ -43,6 +44,7 @@ export default class App extends PureComponent {
           <MyMenu/>
           <Route exact={true} path='/' component={HomePage}/>
           <Route exact={true} path='/editor' component={Editor}/>
+          <Route exact={true} path='/logs' component={Logs}/>
           <Route path='/invoice/:objectId' component={WorkflowHistory}/>
         </div>
       </Router>

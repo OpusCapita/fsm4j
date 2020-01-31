@@ -93,7 +93,7 @@ export const guards = {
   negate: {
     label: 'Negieren'
   },
-  expressionTypeName: 'JavaScript Ausdruck',
+  expressionTypeName: 'Groovy Ausdruck',
   emptyList: 'Für diesen Vorgang wurde kein Schutz definiert.',
   addNewCallout: 'Neu hinzufügen!',
   deleteDialog: {
@@ -112,12 +112,12 @@ export const guards = {
     },
     expression: {
       label: 'Ausdruck',
-      placeholder: 'Geben Sie JavaScript-Code hier ein',
+      placeholder: 'Geben Sie Groovy-Code hier ein',
       results: 'Ergebnisse',
       autoplay: 'Autoplay',
       exampleObject: {
         label: 'Beispielobjekt',
-        hint: 'Klicken Sie auf die Eigenschaft, um die Referenz in den JavaScript-Ausdruckeditor einzugeben.'
+        hint: 'Klicken Sie auf die Eigenschaft, um die Referenz in den Groovy-Ausdruckeditor einzugeben.'
       }
     }
   }

@@ -15,6 +15,10 @@ export default function AppMenu({ history, location }) {
     {
       to: '/editor',
       label: 'Workflow Editor'
+    },
+    {
+      to: '/logs',
+      label: 'Logs'
     }
   ];
 

@@ -1,3 +1,5 @@
+import com.opuscapita.log4j.appender.InMemoryAppender
+
 grails.project.groupId = "com.opuscapita.fsm.demo"
 
 naming_strategy = 'org.hibernate.cfg.DefaultNamingStrategy'
@@ -5,18 +7,18 @@ naming_strategy = 'org.hibernate.cfg.DefaultNamingStrategy'
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
 grails.mime.types = [
-    html: ['text/html', 'application/xhtml+xml'],
-    xml: ['text/xml', 'application/xml'],
-    text: 'text/plain',
-    js: 'text/javascript',
-    rss: 'application/rss+xml',
-    atom: 'application/atom+xml',
-    css: 'text/css',
-    csv: 'text/csv',
-    all: '*/*',
-    json: ['application/json', 'text/json'],
-    form: 'application/x-www-form-urlencoded',
-    multipartForm: 'multipart/form-data'
+        html         : ['text/html', 'application/xhtml+xml'],
+        xml          : ['text/xml', 'application/xml'],
+        text         : 'text/plain',
+        js           : 'text/javascript',
+        rss          : 'application/rss+xml',
+        atom         : 'application/atom+xml',
+        css          : 'text/css',
+        csv          : 'text/csv',
+        all          : '*/*',
+        json         : ['application/json', 'text/json'],
+        form         : 'application/x-www-form-urlencoded',
+        multipartForm: 'multipart/form-data'
 ]
 
 // URL Mapping Cache Max Size, defaults to 5000
@@ -46,3 +48,14 @@ grails.databinding.useSpringBinder = true
 
 //ignore migrate database
 plugin.jcatalogDbMigration.skipChangeLogExecution = true
+
+log4j = {
+    appenders {
+        appender new InMemoryAppender(name: "memory")
+    }
+    all memory: ["com.opuscapita.fsm.FsmEditorService"]
+
+//    root {
+//        info 'stdout', 'memory'
+//    }
+}

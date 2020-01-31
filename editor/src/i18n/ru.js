@@ -92,7 +92,7 @@ export const guards = {
   negate: {
     label: 'Инвертировать'
   },
-  expressionTypeName: 'Выражение JavaScript',
+  expressionTypeName: 'Выражение Groovy',
   emptyList: 'Не указаны сторожевые условия для этого перехода.',
   addNewCallout: 'Добавить новое!',
   deleteDialog: {
@@ -111,12 +111,12 @@ export const guards = {
     },
     expression: {
       label: 'Выражение',
-      placeholder: 'Введите здесь код JavaScript',
+      placeholder: 'Введите здесь код Groovy',
       results: 'Результаты',
       autoplay: 'Автозапуск',
       exampleObject: {
         label: 'Типовой объект',
-        hint: 'Щелкните по свойству, чтобы вставить ссылку на него в редактор выражений JavaScript.'
+        hint: 'Щелкните по свойству, чтобы вставить ссылку на него в редактор выражений Groovy.'
       }
     }
   }

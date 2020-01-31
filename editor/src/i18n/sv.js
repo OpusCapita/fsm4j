@@ -92,7 +92,7 @@ export const guards = {
   negate: {
     label: 'Ogiltigförklara'
   },
-  expressionTypeName: 'JavaScript-uttryck',
+  expressionTypeName: 'Groovy-uttryck',
   emptyList: 'Det finns inga specificerade bevakningar för denna övergång.',
   addNewCallout: 'Lägg till ny!',
   deleteDialog: {
@@ -111,12 +111,12 @@ export const guards = {
     },
     expression: {
       label: 'Uttryck',
-      placeholder: 'Ange JavaScript-kod här',
+      placeholder: 'Ange Groovy-kod här',
       results: 'Resultat',
       autoplay: 'Autoplay',
       exampleObject: {
         label: 'Exempelobjekt',
-        hint: 'Klicka på en egenskap för att införa dess referens i redigeraren för JavaScript-uttryck.'
+        hint: 'Klicka på en egenskap för att införa dess referens i redigeraren för Groovy-uttryck.'
       }
     }
   }
