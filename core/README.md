@@ -110,23 +110,6 @@ def machineDefinition = new MachineDefinition([
                 ]
               ]
             ]
-          ],
-          //automatic guards define if transition can be marked as automatic
-          automatic: [
-            [
-                "name": "lastlyUpdatedMoreThan24hAgo",
-                "params": [
-                  [
-                    "name": "param1",
-                    "value": "value1"
-                  ],
-                  [
-                    "name": "param2",
-                    "value": "value2"
-                  ]
-                ],
-                "negate": true
-            ]
           ]
       ]
     ]
@@ -248,15 +231,6 @@ to the value resolved by a guard - it should be **only** boolean value. In case 
 (error or smth else) - it will be taken as an error and _findAvailableTransitions_ will be rejected with error.
 
 Note: similar to [Spring State Machine Guards](http://docs.spring.io/spring-statemachine/docs/current/reference/htmlsingle/#configuring-guards)
-
-#### Automatic (conditions)
-
-Transition could be marked as automatic using corresponding property. It could be:
-- true (boolean value) - e.g. this transition is always automatic
-- array of conditions(functions, each return true or false), condition(function) result could be inverted if its property _negate_ is set to true
-
-Check for whether object in current state has (at least one) automatic transition could be done via **[task manager](../task-manager)** (inside the application). Basing on evaluated results task manager will be able to take a decision to send event without user interaction.
-
 
 ## Stateful object as a process
 

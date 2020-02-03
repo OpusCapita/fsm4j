@@ -8,7 +8,7 @@
 - [Complete demo app](https://github.com/OpusCapita/fsm-workflow-jvm/tree/master/demo)
 
 ### Introduction
-[Finite State Machine](https://en.wikipedia.org/wiki/Finite-state_machine) workflow is implemented in JS using [Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)-s.
+[Finite State Machine](https://en.wikipedia.org/wiki/Finite-state_machine) workflow is implemented in Groovy
 
 - state is stored in the business object related to workflow(machine), not in an extra
 workflow generic object. Multiple workflows could be defined for one business object,
@@ -38,7 +38,7 @@ The following things will be implemented later as extensions/helpers (separate s
 ### FSM (Core)
 
 FSM core could be found here [here](core/README.md)
-    
+
 ### Workflow Transition History
 
 Workflow Transition History is implemented as separate library. You can find more information [here](history/README.md).
