@@ -4,16 +4,17 @@ Actions (and conditions) configuration
 Action storage
 --------------
 FS based, Action code could be server specific
-(you can't run it out of the box in browser and expect successfull invocation result)
+(you can't run it out of the box in browser and expect successful invocation result)
 
-```javascript
-// sendMail.js
+```groovy
+// sendMail.groovy
 
-function sendMail({ receiver, template, greeting }) {
-  // ...do something
-}
+log.info("Action [sendMail] with args ${args}")
+```
 
-sendMail.paramsSchema = {
+```json
+//sendMail.schema.json
+{
   "type": "object",
   "properties": {
     "receiver": {
@@ -23,8 +24,6 @@ sendMail.paramsSchema = {
   },
   "required": ["receiver"]
 }
-
-module.exports = sendMail;
 ```
 
 **E.g.** as result we get JS object that is a function which has property __paramsSchema__.
@@ -32,16 +31,14 @@ module.exports = sendMail;
 Machine definition: action passing
 ----------------------------------
 
-```javascript
-actions: {
-  "sendMail": require('./sendMail.js'),
-  //    ...other actions
-  }
+```groovy
+actions: [
+  "sendMail": { params -> }
 }
 ```
 
 When the same information is passed to Workflow editor, then action function will not be passed while but in reality only describing info will be in result JSON
-```javascript
+```json
 {
   "sendMail": {
     "paramsSchema": {
@@ -67,21 +64,21 @@ When the same information is passed to Workflow editor, then action function wil
 Machine schema: action(s) invocation definition
 ----------------------------------------------
 
-```javascript
-{
+```groovy
+[
   "name": "sendMail",               // action name
   "params": [                    // list of arguments
-    {
+    [
       "name": "sendTo",             // actions receive own named parameters along with implicit ones (object, from, to, event, context...)
       "value": "support@client.com" // if no `expression` field is specified, `value` is directly mapped to value passed to editor
-    },
-    {
+    ],
+    [
       "name": "greeting",
       "value": "path.to.some.prop", // possibly it will not be a string but object (?), will see later
       "expression": "path"          // if `expression` is specified, special rules are applied to value (see below); later
-    }
+    ]
   ]
-}
+]
 ```
 
 `expression` field indicates that this argument needs a special component as editor input.
@@ -93,7 +90,7 @@ Proposed requirement for custom components: `in` and `out` values should be of t
 Type checking
 --------------
 For ordinary parameters type defined in paramsSchema should be the same as type of entered value.
-For `path expression` perameters type is taken from paramsSchema and checked against **business object** schema (where type of field is defined).
+For `path expression` parameters type is taken from paramsSchema and checked against **business object** schema (where type of field is defined).
 
 
 Arguments types and corresponding editors
