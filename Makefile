@@ -66,8 +66,8 @@ deploy-editor:
 clean-demo:
 	$(MAKE) -C demo clean
 
-.PHONY: deploy-demo
-deploy-demo:
+.PHONY: install-demo
+install-demo:
 	$(MAKE) -C demo install
 
 .PHONY: start-demo
