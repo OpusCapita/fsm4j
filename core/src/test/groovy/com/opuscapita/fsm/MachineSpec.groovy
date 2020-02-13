@@ -25,11 +25,13 @@ class MachineSpec extends Specification {
     def "should machine: can returns true"() {
         expect:
         createMachine().can([object: [status: "opened"], event: "close"])
+        !createMachine().cannot([object: [status: "opened"], event: "close"])
     }
 
     def "should machine can returns false"() {
         expect:
         !createMachine().can([object: [status: "opened"], event: "open"])
+        createMachine().cannot([object: [status: "opened"], event: "open"])
     }
 
     def "should machine can returns false is release guard denies transition"() {
@@ -254,6 +256,26 @@ class MachineSpec extends Specification {
         !machine.isRunning([object: [status: "none"]])
         machine.isRunning([object: [status: "started"]])
         !machine.isRunning([object: [status: "finished"]])
+    }
+
+    def "should available states"() {
+        when:
+        Machine machine = new Machine(
+                [
+                        machineDefinition: new MachineDefinition([
+                                schema: [
+                                        initialState: "started",
+                                        finalStates: ["finished"],
+                                        transitions: [
+                                                [from: "started", to: "finished"]
+                                        ]
+                                ]
+                        ])
+                ]
+        )
+
+        then:
+        machine.availableStates() == ["finished", "started"]
     }
 
     def "should machine start"() {

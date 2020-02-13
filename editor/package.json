@@ -1,5 +1,5 @@
 {
-  "name": "@opuscapita/fsm-workflow-editor",
+  "name": "@opuscapita/fsm-workflow-editor-jvm",
   "version": "2.2.9",
   "description": "Fsm workflow crud editor",
   "main": "lib/index.js",
@@ -12,7 +12,7 @@
   "publishConfig": {
     "registry": "https://opuscapita.jfrog.io/opuscapita/api/npm/npm/"
   },
-  "homepage": "https://github.com/OpusCapita/fsm-workflow/tree/master/packages/editor#readme",
+  "homepage": "https://github.com/OpusCapita/fsm-workflow-jvm/tree/master/editor#readme",
   "keywords": [
     "editor",
     "fsm",

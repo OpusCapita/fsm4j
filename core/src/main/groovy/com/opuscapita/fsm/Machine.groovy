@@ -1,8 +1,6 @@
 package com.opuscapita.fsm
 
-import groovy.util.logging.Log4j
-
-import static com.opuscapita.fsm.ParametersTypeDefinition.createTypeDefinition
+import groovy.util.logging.Log
 
 
 /**
@@ -11,18 +9,26 @@ import static com.opuscapita.fsm.ParametersTypeDefinition.createTypeDefinition
  * @author Alexy Sergeev
  * @author Dmitry Divin
  */
-@Log4j
+@Log
 class Machine {
-    def machineDefinition
-    def context
-    def history
-    Closure convertObjectToReference
+    private def machineDefinition
+    private def context
+    private def history
+    private Closure convertObjectToReference
 
-    Machine(Map params = [:]) {
-        createTypeDefinition().isRequired("machineDefinition").validate(params)
+    /**
+     * The constructor
+     *
+     * @param machineDefinition - (required) instance of type MachineDefinition
+     * @param context - (optional) context object usage
+     * @param history - (optional) history service, by default mock usage
+     */
+    Machine(params) {
         this.machineDefinition = params.machineDefinition
         this.context = params.context
         this.history = params.history
+
+        assert this.machineDefinition != null, "Parameter [machineDefinition] is mandatory"
         // default implementation will throw an exception which should inform
         // developer that machine is not properly configured
         this.convertObjectToReference = params.convertObjectToReference ?: {
@@ -50,7 +56,7 @@ It is expected to be a closure like this:
     // @param user - user name who initiated event/transition (this info will be writted into object wortkflow history)
     // @param description - event/transition/object description (this info will be writted into object wortkflow history)
     // N!B!: history record fields 'from' is set to ''NULL' value and 'event' to '__START__' value
-    def start(Map params = [:]) {
+    def start(params) {
         def object = params.object
         def user = params.user
         String description = params.description
@@ -74,7 +80,7 @@ It is expected to be a closure like this:
     }
 
     // returns current object state
-    def currentState(Map params) {
+    def currentState(params) {
         def object = params.object
         def stateFieldName = this.machineDefinition.objectConfiguration.stateFieldName
         return object[stateFieldName]
@@ -82,7 +88,7 @@ It is expected to be a closure like this:
 
     // returns a list of events (names) that are available at current object state
     // event is optional, it is required only if you search for transitions with the event
-    def availableTransitions(Map params = [:]) {
+    def availableTransitions(params) {
         def object = params.object
         String event = params.event
         def request = params.request
@@ -99,7 +105,7 @@ It is expected to be a closure like this:
     // @param user - user name who initiated event/transition (this info will be writted into object wortkflow history)
     // @param description - event/transition/object description (this info will be writted into object wortkflow history)
     // @param request - event request data
-    Map sendEvent(Map params = [:]) {
+    Map sendEvent(params) {
         def object = params.object
         String event = params.event
         def user = params.user
@@ -110,7 +116,6 @@ It is expected to be a closure like this:
         def workflowName = schema.name
         def objectConfiguration = machineDefinition.objectConfiguration
         def stateFieldName = objectConfiguration.stateFieldName
-        ClassLoader classLoader = params.classLoader
 
         // calculate from state
         String from = currentState([object: object])
@@ -126,7 +131,7 @@ It is expected to be a closure like this:
         if (translations.size() == 0) {
             throw new MachineSendEventException("Transition for 'from': '${from}' and 'event': '${event}' is not found", [object: object, from: from, event: event])
         } else if (translations.size() > 1) {
-            log.warn("More than one transition is found for 'from': '${from}' and 'event': '${event}'")
+            log.warning("More than one transition is found for 'from': '${from}' and 'event': '${event}'")
         }
 
         // select first found transition and read its information
@@ -159,7 +164,7 @@ It is expected to be a closure like this:
 
         List actionExecutionResults = actionDefinitions.inject([], { actionExecutionResults, action ->
             int idx = actionDefinitions.indexOf(action)
-            Map actionParams = this.machineDefinition.prepareParams(actions[idx].params, implicitParams, classLoader)
+            Map actionParams = this.machineDefinition.prepareParams(actions[idx].params, implicitParams)
             actionParams += [actionExecutionResults: actionExecutionResults]
             def actionResult = action(actionParams)
 
@@ -190,7 +195,7 @@ It is expected to be a closure like this:
     /**
      * Checks if workflow is launched and not finished for a specified object
      */
-    boolean isRunning(Map params) {
+    boolean isRunning(params) {
         def object = params.object
         return availableStates().indexOf(currentState([object: object])) != -1 && !isInFinalState([object: object])
     }
@@ -208,7 +213,7 @@ It is expected to be a closure like this:
      * @param params
      * @return returns true if object in specified state
      */
-    boolean is(Map params) {
+    boolean is(params) {
         def object = params.object
         String state = params.state
         return currentState([object: object]) == state
@@ -217,7 +222,7 @@ It is expected to be a closure like this:
     /**
      * returns true if object in one of final states specified in machine definition schema
      */
-    boolean isInFinalState(Map params) {
+    boolean isInFinalState(params) {
         def object = params.object
         return this.machineDefinition.schema.finalStates.indexOf(this.currentState([object: object])) >= 0
     }
@@ -228,7 +233,7 @@ It is expected to be a closure like this:
      * @param params
      * @return returns true if any transition can be released
      */
-    boolean can(Map params) {
+    boolean can(params) {
         String event = params.event
         def object = params.object
         List transitions = availableTransitions([object: object, event: event])
@@ -237,7 +242,7 @@ It is expected to be a closure like this:
         }
     }
 
-    boolean cannot(Map params) {
+    boolean cannot(params) {
         return !can(params)
     }
 
@@ -247,7 +252,7 @@ It is expected to be a closure like this:
      * @param{string} to - (optional) name of target state (can object release from state 'from' and transit to state 'to'?)
      * @param{object} request - (optional) request-specific data
      */
-    boolean canBeReleased(Map params) {
+    boolean canBeReleased(params) {
         def object = params.object
         String to = params.to
         def request = params.request
@@ -293,16 +298,16 @@ It is expected to be a closure like this:
      *   finishedOn
      *}
      */
-    List getHistory(Map searchParams, Map pagingParams = [:], Map sortingParams = [:]) {
+    List getHistory(searchParams, pagingParams, sortingParams) {
         def object = searchParams.object
         def user = searchParams.user
         def finishedOn = searchParams.finishedOn
 
-        def max = pagingParams.max
-        def offset = pagingParams.offset
+        def max = pagingParams?.max
+        def offset = pagingParams?.offset
 
-        def by = sortingParams.by
-        def order = sortingParams.order
+        def by = sortingParams?.by
+        def order = sortingParams?.order
 
         return this.history.search([
                 user        : user,

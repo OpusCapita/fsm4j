@@ -14,7 +14,7 @@ module.exports = merge(common, {
   output: {
     path: resolve(__dirname, '../lib'),
     filename: 'index.js',
-    library: `fsm-workflow-editor`,
+    library: `fsm-workflow-editor-jvm`,
     libraryTarget: 'umd'
   },
   externals: [

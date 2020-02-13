@@ -1,9 +1,9 @@
-class FsmHistoryGrailsPlugin {
+class FsmWorkflowHistoryGrailsPlugin {
     def version = "1.0.0-SNAPSHOT"
     def groupId = "com.opuscapita.grailsplugins"
     def grailsVersion = "2.4 > *"
 
-    def title = "FSM History Plugin"
+    def title = "FSM Workflow History Plugin"
     def author = "Dmitry Divin"
     def authorEmail = "dmitry.divin@opuscapita.com"
     def description = "The plugin provide GORM mappings for FSM"

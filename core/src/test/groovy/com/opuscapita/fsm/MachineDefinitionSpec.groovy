@@ -71,9 +71,9 @@ class MachineDefinitionSpec extends Specification {
 
     def "should throws an error if 'from' is not specified"() {
         when:
-        new MachineDefinition().findAvailableTransitions()
+        new MachineDefinition().findAvailableTransitions([:])
         then:
-        thrown(IllegalParameterException)
+        thrown(AssertionError)
     }
 
     def "should returns empty list if transitions are not defined in machine schema"() {
@@ -202,14 +202,14 @@ class MachineDefinitionSpec extends Specification {
 
     def "should inspect release conditions"() {
         when:
-        new MachineDefinition().inspectReleaseConditions()
+        new MachineDefinition().inspectReleaseConditions([:])
         then:
-        thrown(IllegalParameterException)
+        thrown(AssertionError)
 
         when:
         new MachineDefinition([:]).inspectReleaseConditions([:])
         then:
-        thrown(IllegalParameterException)
+        thrown(AssertionError)
 
         when:
         def result = new MachineDefinition([:]).inspectReleaseConditions([from: "a"])

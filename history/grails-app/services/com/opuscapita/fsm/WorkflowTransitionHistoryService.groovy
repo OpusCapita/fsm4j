@@ -6,7 +6,7 @@ import grails.transaction.Transactional
  * The service provide methods for history
  */
 class WorkflowTransitionHistoryService {
-    static transactional = true
+    static transactional = false
 
 
     /**
@@ -55,7 +55,6 @@ class WorkflowTransitionHistoryService {
      * @param sorting - sorting parameters
      * @return list of found items
      */
-    @Transactional(readOnly = true)
     List<WorkflowTransitionHistory> search(Map searchParams = [:], Map paging = [:], Map sorting = [:]) {
         Integer max = paging.max
         Integer offset = paging.offset
@@ -95,6 +94,7 @@ class WorkflowTransitionHistoryService {
      *
      * @thrown
      */
+    @Transactional
     WorkflowTransitionHistory add(Map bindParams = [:]) {
         return new WorkflowTransitionHistory(bindParams).save(flush: true, failOnError: true)
     }
@@ -107,6 +107,7 @@ class WorkflowTransitionHistoryService {
      *
      * @return deleted items count
      */
+    @Transactional
     Integer delete(Map whereParams = [:], Integer batchSize = 100) {
         Integer deletedTotalCount = 0
         while (true) {

@@ -11,94 +11,93 @@ include $(shell ./build/node/configure-npm.sh)
 #-----------
 .PHONY: clean-core
 clean-core:
-	cd core && mvn clean
+	$(MAKE) -C core clean
 
 .PHONY: test-core
 test-core:
-	cd core && mvn test
+	$(MAKE) -C core test
+
+.PHONY: install-core
+install-core:
+	$(MAKE) -C core install
+
+.PHONY: deploy-core
+deploy-core:
+	$(MAKE) -C core deploy
 
 # -------------
 # history tasks
 #--------------
 .PHONY: clean-history
 clean-history:
-	cd history && mvn clean
+	$(MAKE) -C history clean
 
 .PHONY: test-history
 test-history:
-	cd history && grails test-app
+	$(MAKE) -C history test
 
-#------------------------
-# integration tests tasks
-#------------------------
-.PHONY: clean-integration-tests
-clean-integration-tests:
-	cd integration-tests && grails clean
+.PHONY: install-history
+install-history:
+	$(MAKE) -C history install
 
-.PHONY: test-integration-tests
-test-integration-tests:
-	cd core && mvn -Dmaven.test.skip install
-	cd integration-tests && grails test-app
+.PHONY: deploy-history
+deploy-history:
+	$(MAKE) -C history deploy
 
 #-------------
 # editor tasks
 #-------------
 .PHONY: clean-editor
 clean-editor:
-	cd editor && rm -rf node_modules
+	$(MAKE) -C editor clean
 
 .PHONY: test-editor
 test-editor:
-	cd editor && npm install && npm test
+	$(MAKE) -C editor test
 
-#clean all
-.PHONY: clean
-clean: clean-core clean-history clean-integration-tests clean-editor
-#test all
-.PHONY: test
-test: test-core test-history test-integration-tests test-editor
+.PHONY: deploy-editor
+deploy-editor:
+	$(MAKE) -C editor deploy
 
 #-----------
-# demo goals
+# demo tasks
 #-----------
 .PHONY: clean-demo
 clean-demo:
-	cd demo/client && rm -rf node_modules
-	cd editor && rm -rf node_modules && rm -rf lib
+	$(MAKE) -C demo clean
 
-.PHONY: build-client-demo
-build-client-demo: clean-demo
-	cd demo/client && npm install
-	cd editor && npm install && npm publish --tag latest --dry-run
-	cd demo/client && npm run demo:build
+.PHONY: deploy-demo
+deploy-demo:
+	$(MAKE) -C demo install
 
-.PHONY: build-client-demo-watch
-build-client-demo-watch: clean-demo
-	cd demo/client && npm install
-	cd editor && npm install && npm link ../demo/client
-	cd demo/client && npm run demo:build-watch
+.PHONY: start-demo
+start-demo:
+	$(MAKE) -C demo start
 
-.PHONY: start-server-demo
-start-server-demo:
-	cd core && mvn -Dmaven.test.skip install
-	cd demo/server && grails run-app
+build-demo:
+	$(MAKE) -C demo build
 
-# running server with
+#---------------
+# groupped tasks
+#---------------
+.PHONY: clean
+clean: clean-core clean-history clean-editor clean-demo
+
 .PHONY: start
-start:
-	$(MAKE) -j build-client-demo-watch start-server-demo
-	#$(MAKE) --output-sync=recurse -j build-client-demo-watch start-server-demo
+start: install-core install-history start-demo
 
-.PHONY: build-client-demo
-build: build-client-demo
-	cd demo/server && grails war
+.PHONY: build
+build: install-core install-history build-demo
 
 .PHONY: deploy
-deploy: test build-client-demo
-	cd core && mvn -Dmaven.test.skip deploy
-	cd history && grails refresh-dependencies && grails maven-deploy -Dgrails.env=prod -verbose --offline
-	cd demo/server && grails refresh-dependencies && grails maven-deploy -Dgrails.env=prod -verbose --offline
+deploy: deploy-core deploy-history deploy-editor deploy-demo
 
+.PHONY: test
+test: test-core test-history test-editor
+
+#-------------
+# docker tasks
+#-------------
 .PHONY: docker-auth
 docker-auth: ## Login to Dockerhub
 	./build/docker/docker-auth.sh
@@ -119,6 +118,9 @@ build-docker: docker-auth build ## Build application Docker image
 publish-docker: docker-auth ## Publish application Docker image
 	./build/docker/application/push.sh
 
+#------------
+# asure tasks
+#------------
 .PHONY: deploy-demo
 deploy-demo: ## Deploy demo to cloud
 	./build/demo/deploy.sh --ci-build-url=$(CI_BUILD_URL)

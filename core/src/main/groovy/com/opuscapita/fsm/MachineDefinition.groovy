@@ -1,8 +1,5 @@
 package com.opuscapita.fsm
 
-
-import static com.opuscapita.fsm.ParametersTypeDefinition.createTypeDefinition
-
 /**
  * Machine Definition
  *
@@ -10,13 +7,13 @@ import static com.opuscapita.fsm.ParametersTypeDefinition.createTypeDefinition
  * @author Dmitry Divin
  */
 class MachineDefinition {
-    Map schema
+    private def schema
     //condition is an object, where each property name is condition name and
-    //value is condition implentation (function)
-    Map conditions
+    //value is condition implementation (function)
+    private def conditions
     //actions is an object, where each property is implemented action name and
     //value is action(function) itself
-    Map actions
+    private def actions
     /**
      * objectConfiguration is required by machine/engine and editor:
      *{*   stateFieldName,       // (String) object property that holds current object state
@@ -29,20 +26,25 @@ class MachineDefinition {
      *                         //   instead of object.total < 1
      *   example              // (Object) object example that is used in editor
      *}*/
-    Map objectConfiguration
+    private def objectConfiguration
+    private ClassLoader classLoader
 
-    MachineDefinition(Map params = [:]) {
-        createTypeDefinition()
-                .withType("schema.states", List)
-                .withType("schema.finalStates", List)
-                .withType("schema.transitions", List)
-                .withType("conditions", Map)
-                .withType("actions", Map)
-                .withType("objectConfiguration", Map)
-                .validate(params)
-
+    /**
+     * The constructor
+     *
+     * @param schema - (optional) Map of schema definition
+     * @param schema.states - (optional) List of states
+     * @param schema.finalStates - (optional) List of final states
+     * @param schema.transitions - (optional) List of transitions
+     * @param conditions - (optional) Map of conditions definitions
+     * @param actions - (optional) Map of actions definitions
+     * @param objectConfiguration - (optional) Map of object configuration
+     * @param classLoader - (optional) ClassLoader usage, need for evaluate Groovy expressions
+     */
+    MachineDefinition(params = [:]) {
         Map schema = params.schema ?: [:]
-        this.schema = [finalStates: []] + schema
+        this.schema = [states: [], finalStates: [], transitions: []] + schema
+        this.classLoader = params.classLoader
 
         this.conditions = params.conditions ?: [:]
         this.actions = params.actions ?: [:]
@@ -58,22 +60,13 @@ class MachineDefinition {
     /**
      * is a generic function which returns passed conditions with results of evaluation
      *
-     * @param conditions
-     * @param implicitParams
+     * @param conditions - (required) inbound conditions of type Collection
+     * @param implicitParams - (required) Map of implicit parameters
      *
      * @return result as boolean
      */
-    private List<Map> inspectConditions(Map params = [:]) {
-        createTypeDefinition()
-                .isRequired("conditions")
-                .withType("conditions", Collection)
-                .withType("implicitParams", Map)
-                .withType("classLoader", ClassLoader)
-                .isRequired("implicitParams")
-                .validate(params)
-
+    private List<Map> inspectConditions(params) {
         Map implicitParams = params.implicitParams
-        ClassLoader classLoader = params.classLoader
         // collecting conditions that belong to current transition
         List preparedConditions = params.conditions.collect { Map condition ->
             if (condition.expression) {
@@ -93,12 +86,12 @@ class MachineDefinition {
             def res
             if (condition instanceof Closure) {
                 res = condition(
-                        prepareParams(params.conditions[i].params, implicitParams, classLoader)
+                        prepareParams(params.conditions[i].params, implicitParams)
                 ) as Boolean
             } else {
                 isExpression = true
                 String expression = condition.expression
-                res = evaluateExpression(expression, implicitParams, classLoader) as Boolean
+                res = evaluateExpression(expression, implicitParams) as Boolean
             }
             // `negate` property is applied only to function invocations
             result << [condition: params.conditions[i], result: params.conditions[i].negate && !isExpression ? !res : res]
@@ -107,31 +100,37 @@ class MachineDefinition {
         return result
     }
 
-    static evaluateExpression(String expression, Map implicitParams, ClassLoader classLoader) {
+    private def evaluateExpression(String expression, implicitParams) {
         GroovyShell groovyShell = new GroovyShell(classLoader, new Binding(implicitParams))
         return groovyShell.evaluate(expression)
     }
 
     // evaluate explicit params and combine with implicit params
     // this function is not made static because it is used in Machine.groovy via instance accessor
-    Map prepareParams(Collection explicitParams, Map implicitParams, ClassLoader classLoader) {
+    Map prepareParams(explicitParams, implicitParams) {
         return explicitParams.inject([:], { Map result, Map param ->
             String name = param.name
             def value = param.value
             String expression = param.expression
 
-            result[name] = expression ? evaluateExpression(expression, implicitParams, classLoader) : value
+            result[name] = expression ? evaluateExpression(expression, implicitParams) : value
             result
         }) + implicitParams
     }
 
-    List findAvailableTransitions(Map params = [:]) {
-        createTypeDefinition().isRequired("from").validate(params)
+    /**
+     * @param from - (required) transition from
+     *
+     * @return list of available transitions
+     */
+    List findAvailableTransitions(params) {
         String from = params.from
         String event = params.event
         def object = params.object
         def request = params.request
         def context = params.context
+
+        assert from != null, "Parameter [from] is mandatory"
 
         return inspectTransitions([from: from, event: event, object: object, request: request, context: context]).findAll { Map res ->
             Map result = res.result
@@ -142,15 +141,17 @@ class MachineDefinition {
 
     /**
      * inspectTransitions is a generic function which returns transitions with evaluated conditions
+     *
+     * @param from - (required) transition from
      */
-    List inspectTransitions(Map params = [:]) {
-        createTypeDefinition().isRequired("from").validate(params)
-
+    List inspectTransitions(params) {
         String from = params.from
         String event = params.event
         def object = params.object
         def request = params.request
         def context = params.context
+
+        assert from != null, "Parameter [from] is mandatory"
 
         List transitions = this.schema.transitions
         if (transitions) {
@@ -201,17 +202,17 @@ class MachineDefinition {
      *
      * Release is permitted if not stated otherwise.
      *
-     * @param params.from - state to be inspected
-     * @param params.to (optional) - 'to' state in release guards
+     * @param from - (required) state to be inspected
+     * @param to (optional) - 'to' state in release guards
      */
-    def inspectReleaseConditions(Map params = [:]) {
-        createTypeDefinition().isRequired("from").validate(params)
-
+    def inspectReleaseConditions(params) {
         String from = params.from
         String to = params.to
         def object = params.object
         def request = params.request
         def context = params.context
+
+        assert from != null, "Parameter [from] is mandatory"
 
         // get state definition (if exists) from schema
         def state = this.schema.states?.find { it.name == from }
@@ -257,11 +258,11 @@ class MachineDefinition {
      */
     List getAvailableStates() {
         List result = [this.schema.initialState] + this.schema.finalStates
-        if (this.schema.states && this.schema.states.size() > 0) {
+        if (this.schema.states) {
             result += this.schema.states.collect { state -> state.name }
         }
 
-        if (this.schema.transitions && this.schema.transitions.size() > 0) {
+        if (this.schema.transitions) {
             result += this.schema.transitions.inject([], { acc, next -> acc + [next.from, next.to] })
         }
 

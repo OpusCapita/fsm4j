@@ -9,7 +9,7 @@
   </parent>
 
   <groupId>com.opuscapita.fsm</groupId>
-  <artifactId>fsm-workflow-jvm-core</artifactId>
+  <artifactId>fsm-workflow-core-jvm</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
   <name>FSM - core</name>
@@ -25,6 +25,11 @@
       <url>${projectDistributionMangementSiteBaseUrl}/${project.groupId}/${project.artifactId}/${project.version}</url>
     </site>
   </distributionManagement>
+
+  <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
 
   <build>
     <plugins>
@@ -48,11 +53,65 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.5</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>default-instrument</id>
+            <goals>
+              <goal>instrument</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>default-restore-instrumented-classes</id>
+            <goals>
+              <goal>restore-instrumented-classes</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>default-report</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>default-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>COMPLEXITY</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>40%</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.12.2</version>
         <configuration>
           <parallel>classes</parallel>
           <argLine>-Xms512m -Xmx1024m</argLine>
+          <systemPropertyVariables>
+            <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
     </plugins>
@@ -85,11 +144,13 @@
   </dependencyManagement>
 
   <dependencies>
-    <!-- log4j dependencies -->
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <optional>true</optional>
+      <!-- must be on the classpath -->
+      <groupId>org.jacoco</groupId>
+      <artifactId>org.jacoco.agent</artifactId>
+      <classifier>runtime</classifier>
+      <version>0.8.5</version>
+      <scope>test</scope>
     </dependency>
     <!-- groovy dependencies -->
     <dependency>
