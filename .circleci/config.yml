@@ -43,14 +43,14 @@ jobs:
       - checkout
       - run: wget -O /vault.zip https://releases.hashicorp.com/vault/1.2.2/vault_1.2.2_linux_amd64.zip; unzip /vault.zip -d /usr/bin/
       - setup_remote_docker
-#      - run:
-#          name: Check if image build is required
-#          command: |
-#            make docker-auth
-#            if [ -z "$(git show --name-only | grep build/docker/ci)" ]; then
-#              DOCKER_CLI_EXPERIMENTAL=enabled docker manifest inspect opuscapita/fsm-workflow-jvm:ci && \
-#                circleci step halt || echo "Image doesn't exist, proceed"
-#            fi
+      - run:
+          name: Check if image build is required
+          command: |
+            make docker-auth
+            if [ -z "$(git show --name-only | grep build/docker/ci)" ]; then
+              DOCKER_CLI_EXPERIMENTAL=enabled docker manifest inspect opuscapita/fsm-workflow-jvm:ci && \
+                circleci step halt || echo "Image doesn't exist, proceed"
+            fi
       - run: make build-docker-ci && make publish-docker-ci
 
   build:

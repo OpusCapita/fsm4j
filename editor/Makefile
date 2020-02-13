@@ -16,7 +16,7 @@ test: install-dependencies
 
 .PHONY: deploy
 deploy:
-	npm run publish
+	npm publish
 
 .PHONY: help
 help:
