@@ -27,4 +27,4 @@ docker run \
   -v "$project_root_dir":/application:delegated \
   -v "$HOME/.m2/repository":/root/.m2/repository:delegated \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  "$ci_docker_image" bash -c "$*"
+  "$ci_docker_image" bash -c "${*-bash}"

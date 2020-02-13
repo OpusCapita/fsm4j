@@ -1,6 +1,4 @@
 .DEFAULT_GOAL := help
-.PHONY: all clean install uninstall
-
 
 # goals which need credentials for NPM
 include $(shell ./build/grails/configure-maven.sh)
@@ -56,7 +54,7 @@ test-editor:
 	$(MAKE) -C editor test
 
 .PHONY: deploy-editor
-deploy-editor:
+deploy-editor: # Deploy editor
 	$(MAKE) -C editor deploy
 
 #-----------
@@ -131,4 +129,7 @@ destroy-demo: ## Destroy demo in a cloud
 
 .PHONY: help
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' && echo "\nNOTE: You can find Makefile goals implementation stored in \"./build\" directory"
+	@awk '{ if (NF == 2 && $$1 == "include") { while ((getline line < $$2) > 0) print line ; close($$2) } else print }' $(firstword $(MAKEFILE_LIST)) \
+		| grep -E '^[a-zA-Z_-]+:.*?## .*$$' \
+		| sort \
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
