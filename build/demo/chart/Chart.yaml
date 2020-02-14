@@ -1,8 +1,8 @@
 apiVersion: v1
 description: FSM Demo helm chart
-name: fsm-workflow-jvm
+name: fsm4j
 version: 0.0.1
-home: https://github.com/OpusCapita/fsm-workflow-jvm
+home: https://github.com/OpusCapita/fsm4j
 maintainers:
   - name: Kirill Volkovich
     email: kirill.volkovich@opuscapita.com

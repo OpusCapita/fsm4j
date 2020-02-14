@@ -76,7 +76,7 @@ spec:
                   - mysql
               topologyKey: kubernetes.io/hostname
       containers:
-      - name: fsm-workflow-jvm
+      - name: fsm4j
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
         env:
