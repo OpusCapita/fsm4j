@@ -113,7 +113,7 @@ class MachineDefinition {
             def value = param.value
             String expression = param.expression
 
-            result[name] = expression ? evaluateExpression(expression, implicitParams) : value
+            result[name] = expression ? evaluateExpression(value, implicitParams) : value
             result
         }) + implicitParams
     }

@@ -1,5 +1,4 @@
 .DEFAULT_GOAL := help
-.PHONY: all clean install uninstall
 
 .PHONY: clean
 clean:

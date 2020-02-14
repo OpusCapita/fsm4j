@@ -210,6 +210,15 @@ class MachineSpec extends Specification {
         res[0].description == foundHistoryRecords[0].description
     }
 
+    def "should machine get currentState"() {
+        when:
+        def state = "new"
+        def object = [(MachineDefinition.defaultObjectStateFieldName): state]
+
+        then:
+        new Machine([machineDefinition: new MachineDefinition()]).currentState([object: object]) == state
+    }
+
     def "should machine is returns correct value"() {
         given:
         Machine machine = new Machine(
@@ -427,5 +436,262 @@ class MachineSpec extends Specification {
 
         then:
         thrown(MachineSendEventException)
+    }
+
+    def "should arguments are correctly passed to machineDefinition.findAvailableTransitions"() {
+        given:
+        def getAvailableStatesIsCalled = false
+        def machine = new Machine([
+                machineDefinition: [
+                        getAvailableStates: {
+                            getAvailableStatesIsCalled = true
+
+                            return []
+                        }
+                ]
+        ])
+        when:
+        machine.availableStates()
+
+        then:
+        getAvailableStatesIsCalled
+    }
+
+    def "should arguments are correctly pased to machineDefinition.getAvailableStates"() {
+        def object = [
+                status: "none"
+        ]
+        def context = [
+                sendEmail: {}
+        ]
+
+        when:
+        def machine = new Machine([
+                machineDefinition: [
+                        schema: [:],
+                        findAvailableTransitions: {passsedArgument->
+                            assert passsedArgument
+                            assert passsedArgument.object == object
+                            assert passsedArgument.context == context
+
+                            []
+                        },
+                        objectConfiguration: [
+                                stateFieldName: 'status'
+                        ]
+                ],
+                context: context
+        ])
+
+        then:
+        machine.availableTransitions([object: object]) == []
+    }
+
+    def "should machine: sendEvent"() {
+        given:
+        Closure convertObjectToReference = { object ->
+            [
+                    businessObjId  : 'tesla',
+                    businessObjType: 'car'
+            ]
+        }
+
+        Closure createMachine = { params = [actions: [:]] ->
+            def actions = params.actions
+            def history = params.history
+            def states = params.states
+            def objectAlias = params.objectAlias
+            def objectConfiguration = [:]
+            if (objectAlias) {
+                objectConfiguration.alias = objectAlias
+            }
+            return new Machine([
+                    machineDefinition: new MachineDefinition([
+                            objectConfiguration: objectConfiguration,
+                            schema: [
+                                    initialState: "started",
+                                    transitions: [
+                                            [
+                                                    from: "started",
+                                                    event: "move",
+                                                    to: "first-stop"
+                                            ],
+                                            [
+                                                    from: "first-stop",
+                                                    event: "move (action is not defined)",
+                                                    to: "second-stop",
+                                                    actions: [
+                                                            [name: "nonExistingAction"]
+                                                    ]
+                                            ],
+                                            [
+                                                    from: "first-stop",
+                                                    event: "move (action is defined)",
+                                                    to: "second-stop",
+                                                    actions: [
+                                                            [
+                                                                    name: 'sendEmail',
+                                                                    params: [
+                                                                            [
+                                                                                    name: 'first',
+                                                                                    value: 1
+                                                                            ],
+                                                                            [
+                                                                                    name: 'second',
+                                                                                    value: '2'
+                                                                            ]
+                                                                    ]
+                                                            ]
+                                                    ]
+                                            ],
+                                            [
+                                                    from: "first-stop",
+                                                    event: "doAsync",
+                                                    to: "second-stop",
+                                                    actions: [
+                                                            [
+                                                                    name: "doAsync0",
+                                                                    params: [
+                                                                           [
+                                                                                   name: 'one',
+                                                                                   value: 1
+                                                                           ],
+                                                                            [
+                                                                                    name: 'two',
+                                                                                    value: 2
+                                                                            ]
+                                                                    ]
+                                                            ],
+                                                            [
+                                                                    name: "doAsync1",
+                                                                    params: [
+                                                                            [
+                                                                                        name: 'three',
+                                                                                        value: 3
+                                                                            ],
+                                                                            [
+                                                                                    name: 'four',
+                                                                                    value: 4
+                                                                            ]
+                                                                    ]
+                                                            ]
+                                                    ]
+                                            ]
+                                    ],
+                                    states: states ? states : [:]
+                            ],
+                            actions: actions
+                    ]),
+                    history: history,
+                    convertObjectToReference: convertObjectToReference
+            ])
+        }
+
+        def machine = createMachine()
+
+        when:
+        //sends "move" event that moves object to the next state correctly
+        def result = machine.sendEvent([object: [status: "started"], event: "move"])
+
+        then:
+        result.object.status == "first-stop"
+
+        when:
+        def object = [status: "first-stop"]
+        //sends "step-back" event that does not exist
+        machine.sendEvent([object: object, event: "step-back"])
+
+        then:
+        //the status is not changed
+        object.status == "first-stop"
+        MachineSendEventException anError = thrown()
+        anError.eventParams.from == "first-stop"
+        anError.eventParams.event == "step-back"
+
+        when:
+        //sends "move (action is not defined)" that requires action execution, but action is not defined/implemented
+        machine.sendEvent([object: [status: "first-stop"], event: "move (action is not defined)"])
+
+        then:
+        thrown(MachineSendEventException)
+
+        when:
+        //sends "move (action is defined)" that requires predefined action execution
+        def sendEmailResult = 'awesomeEmail'
+        def actions = [
+                sendEmail: {sendEmailResult}
+        ]
+        machine = createMachine([actions: actions])
+        result = machine.sendEvent([object: [status: "first-stop"], event: "move (action is defined)"])
+
+        then:
+        result.object.status == 'second-stop'
+        result.actionExecutionResults.size() == 1
+        result.actionExecutionResults[0].name == "sendEmail"
+        result.actionExecutionResults[0].result == sendEmailResult
+
+        when:
+        //action has access to configured object alias
+        def objectAlias = "car"
+        object = [status: "first-stop"]
+        actions = [
+                sendEmail: {params -> [(objectAlias): params[objectAlias]]}
+        ]
+        machine = createMachine([actions: actions, objectAlias: objectAlias])
+        result = machine.sendEvent([object: object, event: "move (action is defined)"])
+
+        then:
+        result.actionExecutionResults.size() == 1
+        result.actionExecutionResults[0].name == "sendEmail"
+        result.actionExecutionResults[0].result == [car: object]
+
+        when:
+        //creates correct history record
+        def historyRecordUnderTest
+        def history = [
+                add: {passedData->
+                    historyRecordUnderTest = passedData
+                    return historyRecordUnderTest
+                }
+        ]
+        machine = createMachine([history: history])
+        def from  = "started"
+        object = [status: from]
+        def user = "johnny"
+        def description = 'getoff!'
+        def event = 'move'
+
+        result = machine.sendEvent([object: object, event: event, user: user, description: description])
+
+        then:
+        historyRecordUnderTest == [
+                from : from,
+                to: result.object.status,
+                event: event,
+        ] + convertObjectToReference(result.object) + [
+                workflowName: null,
+                user: user,
+                description: description
+        ]
+    }
+
+    def "should required params"() {
+        when:
+        new Machine()
+
+        then:
+        thrown(NullPointerException)
+
+        when:
+        new Machine([:])
+
+        then:
+        thrown(AssertionError)
+
+        when:
+        new Machine([machineDefinition: new MachineDefinition([objectConfiguration: [stateFieldName: "state"]])]).start([object: [:]])
+
+        then:
+        thrown(Exception)
     }
 }

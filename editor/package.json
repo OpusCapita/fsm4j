@@ -8,7 +8,7 @@
   ],
   "author": "Egor Stambakio <egor.stambakio@opuscapita.com>",
   "license": "Apache-2.0",
-  "repository": "OpusCapita/fsm/tree/master/packages/editor",
+  "repository": "OpusCapita/fsm-workflow-jvm/tree/master/editor",
   "publishConfig": {
     "registry": "https://opuscapita.jfrog.io/opuscapita/api/npm/npm/"
   },

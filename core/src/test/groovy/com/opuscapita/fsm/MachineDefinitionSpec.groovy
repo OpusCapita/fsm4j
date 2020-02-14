@@ -188,7 +188,7 @@ class MachineDefinitionSpec extends Specification {
 
         when:
         //expression guard forbids transition if expression throws an error
-        definition.findAvailableTransitions([from: "h", object: []])
+        definition.findAvailableTransitions([from: "h", object: [:]])
         then:
         thrown(MissingPropertyException)
 
@@ -289,5 +289,153 @@ class MachineDefinitionSpec extends Specification {
         result[0].condition == stateA[0]
         result[1].condition == stateA[1]
         result[2].condition == stateA[2]
+    }
+
+    def "should returns results of guards evaluation only by default"() {
+        given:
+        def definition = [
+                schema: [
+                        transitions: [
+                                [
+                                        from  : "a",
+                                        to    : "b",
+                                        event : "a->b",
+                                        guards: [
+                                                [expression: "object.enabled"],
+                                                [name: "lessThan", negate: true, params: [[name: "fieldName", value: "total"], [name: "limit", value: 0]]]
+                                        ],
+                                ],
+                                [
+                                        from  : "b",
+                                        to    : "c",
+                                        event : "b->c",
+                                        guards: [[name: "isEnabled"]]
+                                ],
+                                [
+                                        from : "a",
+                                        to   : "c",
+                                        event: "a->c",
+                                ],
+                                [
+                                        from : "a",
+                                        to   : "d",
+                                        event: "a->d"
+                                ]
+                        ]
+                ],
+                conditions : [
+                        isEnabled: { params -> params.object.enabled },
+                        lessThan : { params -> params.limit > params.object[params.fieldName] },
+                ]
+        ]
+        def machineDefinition = new MachineDefinition(definition)
+        def object = [
+                enabled: true,
+                total  : 150,
+                status : "a"
+        ]
+        when:
+        def result = machineDefinition.inspectTransitions([from: "a", object: object])
+
+        then:
+        result == [
+                [
+                        transition: definition.schema.transitions[0],
+                        result    : [
+                                guards: [
+                                        [
+                                                condition: definition.schema.transitions[0].guards[0],
+                                                result   : object.enabled
+                                        ],
+                                        [
+                                                condition: definition.schema.transitions[0].guards[1],
+                                                result   : object.total > 0
+                                        ]
+                                ]
+                        ]
+                ],
+                [
+                        transition: definition.schema.transitions[2],
+                        result    : [:]
+                ],
+                [
+                        transition: definition.schema.transitions[3],
+                        result    : [:]
+                ],
+        ]
+    }
+
+    def "should machine definition: object alias"() {
+        given:
+        Map object = [brand: "tesla"]
+
+        when:
+        def machineDefinition = new MachineDefinition()
+
+        then:
+        machineDefinition.prepareObjectAlias(object) == [:]
+
+        when:
+        machineDefinition = new MachineDefinition([
+                objectConfiguration: [:]
+        ])
+
+        then:
+        machineDefinition.prepareObjectAlias(object) == [:]
+
+        when:
+        machineDefinition = new MachineDefinition([
+                objectConfiguration: [
+                        alias: "car"
+                ]
+        ])
+
+        then:
+        machineDefinition.prepareObjectAlias(object) == [car: object]
+    }
+
+    def "should prepare params"() {
+        given:
+        Map object = [
+                numberProp: 234234.3454,
+                stringProp: '%xc%ds%%^%$^&--0$&*$&*'
+        ]
+
+        List params = [
+                [
+                        name: "one",
+                        value: 'invoice["numberProp"]',
+                        expression: 'path'
+                ],
+                [
+                        name: 'two',
+                        value: 'object["stringProp"]',
+                        expression: 'path'
+                ]
+        ]
+
+        MachineDefinition machineDefinition = new MachineDefinition([
+                objectConfiguration: [
+                        alias: "invoice"
+                ]
+        ])
+
+        Map implicitParams = [object: object] + machineDefinition.prepareObjectAlias(object)
+
+        //return evaluated path expressions
+        when:
+            def newParams = machineDefinition.prepareParams(params, implicitParams)
+
+        then:
+        newParams == ([one: object.numberProp, two: object.stringProp] + implicitParams)
+
+        //throw for invalid path
+        when:
+        newParams = machineDefinition.prepareParams(
+                [name: "three", expression: "path", value: '["numberProp"]'],
+                implicitParams
+        )
+        then:
+        thrown(MissingMethodException)
     }
 }
