@@ -58,7 +58,7 @@ jobs:
     steps:
       - git/checkout-with-submodules
       - restore_cache: *restore_cache
-      - run: make deploy
+      - run: if [ ! -z "$CIRCLE_TAG" ]; then make deploy-release; else make deploy; fi
       - setup_remote_docker
       - run: make build-docker
       - run: make publish-docker

@@ -19,6 +19,10 @@ test: install-dependencies
 build: install-dependencies
 	npm run build
 
+.PHONY: publish
+deploy: install-dependencies
+	npm publish --dry-run
+
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' && echo "\nNOTE: You can find Makefile goals implementation stored in \"./build\" directory"
