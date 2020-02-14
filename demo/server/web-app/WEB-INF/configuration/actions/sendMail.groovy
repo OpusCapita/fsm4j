@@ -1,1 +1,0 @@
-log.info("Action [sendMail] with args ${args}")

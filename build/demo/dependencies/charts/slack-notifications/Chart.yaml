@@ -1,3 +1,0 @@
-apiVersion: v1
-name: slack-notifications
-version: 0.0.1

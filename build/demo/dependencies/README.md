@@ -1,1 +1,0 @@
-# minsk-core-helm-charts

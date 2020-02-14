@@ -1,6 +1,0 @@
-image:
-  repository: ""
-  tag: ""
-ingress:
-  path: ""
-  host: ""

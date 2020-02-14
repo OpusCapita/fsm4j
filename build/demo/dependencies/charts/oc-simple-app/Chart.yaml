@@ -1,5 +1,0 @@
-apiVersion: v1
-appVersion: "1.0"
-description: Simple app. First shared OpusCapita Helm chart ever
-name: oc-simple-app
-version: 0.1.0
