@@ -9,7 +9,7 @@
   </parent>
 
   <groupId>com.opuscapita.fsm</groupId>
-  <artifactId>fsm-workflow-core-jvm</artifactId>
+  <artifactId>fsm4j-core</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
   <name>FSM - core</name>
@@ -91,7 +91,27 @@
                   <element>BUNDLE</element>
                   <limits>
                     <limit>
-                      <counter>COMPLEXITY</counter>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>90%</minimum>
+                    </limit>
+                    <limit>
+                      <counter>CLASS</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>90%</minimum>
+                    </limit>
+                    <limit>
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>70%</minimum>
+                    </limit>
+                    <limit>
+                      <counter>METHOD</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>60%</minimum>
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
                       <value>COVEREDRATIO</value>
                       <minimum>50%</minimum>
                     </limit>

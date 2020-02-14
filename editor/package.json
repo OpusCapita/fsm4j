@@ -1,5 +1,5 @@
 {
-  "name": "@opuscapita/fsm-workflow-editor-jvm",
+  "name": "@opuscapita/fsm4j-editor",
   "version": "2.2.9",
   "description": "Fsm workflow crud editor",
   "main": "lib/index.js",
@@ -8,11 +8,11 @@
   ],
   "author": "Egor Stambakio <egor.stambakio@opuscapita.com>",
   "license": "Apache-2.0",
-  "repository": "OpusCapita/fsm-workflow-jvm/tree/master/editor",
+  "repository": "OpusCapita/fsm4j/tree/master/editor",
   "publishConfig": {
     "registry": "https://opuscapita.jfrog.io/opuscapita/api/npm/npm/"
   },
-  "homepage": "https://github.com/OpusCapita/fsm-workflow-jvm/tree/master/editor#readme",
+  "homepage": "https://github.com/OpusCapita/fsm4j/tree/master/editor#readme",
   "keywords": [
     "editor",
     "fsm",

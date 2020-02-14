@@ -4,7 +4,7 @@ grails.work.dir = 'target'
 grails.project.target.level = 1.8
 grails.project.source.level = 1.8
 
-grails.plugin.location."fsm-workflow-jvm-history" = "../../history"
+grails.plugin.location."fsm4j-history" = "../../history"
 
 //scan jars from classpath to resolve TLD for JSP
 grails.tomcat.scan.enabled = true
@@ -25,7 +25,7 @@ grails.project.dependency.resolution = {
 
     dependencies {
         runtime('mysql:mysql-connector-java:5.1.31')
-        runtime("com.opuscapita.fsm:fsm-workflow-jvm-core:${appVersion}")
+        runtime("com.opuscapita.fsm:fsm4j-core:${appVersion}")
 
         runtime 'javax.servlet:jstl:1.2'
         compile('org.grails:grails-web-databinding-spring:2.4.4')

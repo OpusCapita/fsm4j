@@ -7,7 +7,7 @@ Workflow History is an extension to FSM Core.  It provides server-side API for s
 ### Include grails plugin dependency
 
 ```
-com.opuscapita.fsm:fsm-workflow-jvm-history:1.0.0-SNAPSHOT
+com.opuscapita.fsm:fsm4j-history:1.0.0-SNAPSHOT
 ```
 
 ## Basic Usage

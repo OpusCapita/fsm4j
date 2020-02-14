@@ -18,7 +18,7 @@ aliases:
 
 setup_docker: &setup_docker
   docker:
-    - image: opuscapita/fsm-workflow-jvm:ci
+    - image: opuscapita/fsm4j:ci
       environment:
         JAVA_OPTS: -Xms2g -Xmx2g
       auth:
@@ -48,7 +48,7 @@ jobs:
           command: |
             make docker-auth
             if [ -z "$(git show --name-only | grep build/docker/ci)" ]; then
-              DOCKER_CLI_EXPERIMENTAL=enabled docker manifest inspect opuscapita/fsm-workflow-jvm:ci && \
+              DOCKER_CLI_EXPERIMENTAL=enabled docker manifest inspect opuscapita/fsm4j:ci && \
                 circleci step halt || echo "Image doesn't exist, proceed"
             fi
       - run: make build-docker-ci && make publish-docker-ci

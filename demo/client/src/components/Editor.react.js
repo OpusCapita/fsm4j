@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import superagent from 'superagent';
-import WorkflowEditor from '@opuscapita/fsm-workflow-editor-jvm';
+import WorkflowEditor from '@opuscapita/fsm4j-editor';
 import componentsRegistry from '../customComponentsRegistry';
 import { notificationSuccess, notificationError } from '../constants';
 import { url } from '../utils';

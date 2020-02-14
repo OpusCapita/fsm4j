@@ -8,6 +8,8 @@ install-dependencies:
 clean:
 	rm -rf node_modules
 	rm -rf lib
+	rm -rf nyc_output
+	rm -rf coverage
 
 .PHONY: test
 test: install-dependencies

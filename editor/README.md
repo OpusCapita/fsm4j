@@ -1,8 +1,8 @@
 # Usage
 
-[Editor demo (showroom)](https://opuscapita.github.io/fsm-workflow-jvm/branches/master/editor/?currentComponentName=WorkflowEditor&maxContainerWidth=100%25) - see example schema in props
+[Editor demo (showroom)](https://opuscapita.github.io/fsm4j/branches/master/editor/?currentComponentName=WorkflowEditor&maxContainerWidth=100%25) - see example schema in props
 
-[Actions & conditions paramsSchema definition and usage](https://github.com/OpusCapita/fsm-workflow-jvm/blob/master/editor/src/components/Actions/Readme.md)
+[Actions & conditions paramsSchema definition and usage](https://github.com/OpusCapita/fsm4j/blob/master/editor/src/components/Actions/Readme.md)
 
 ## i18n
 

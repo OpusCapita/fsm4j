@@ -1,11 +1,11 @@
 ## FSM Workflow (for Java)
 
-[![CircleCI Status](https://circleci.com/gh/OpusCapita/fsm-workflow-jvm/tree/master.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/OpusCapita/fsm-workflow-jvm)
-![badge-license](https://img.shields.io/github/license/OpusCapita/fsm-workflow-jvm.svg)
+[![CircleCI Status](https://circleci.com/gh/OpusCapita/fsm4j/tree/master.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/OpusCapita/fsm4j)
+![badge-license](https://img.shields.io/github/license/OpusCapita/fsm4j.svg)
 
 ### Demo
 
-- [Complete demo app](https://github.com/OpusCapita/fsm-workflow-jvm/tree/master/demo)
+- [Complete demo app](https://github.com/OpusCapita/fsm4j/tree/master/demo)
 
 ### Introduction
 [Finite State Machine](https://en.wikipedia.org/wiki/Finite-state_machine) workflow is implemented in Groovy

@@ -24,7 +24,7 @@ grails.project.dependency.resolution = {
 
     dependencies {
         compile('com.jcatalog:jcatalog-util:7.21.GA.1')
-        test("com.opuscapita.fsm:fsm-workflow-core-jvm:${appVersion}")
+        test("com.opuscapita.fsm:fsm4j-core:${appVersion}")
 
         test('com.jcatalog.maven:maven-jcatalog-db-plugin:1.2',
                 'mysql:mysql-connector-java:5.1.31',

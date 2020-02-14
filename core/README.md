@@ -7,7 +7,7 @@ Machine and its definition.
 ### Include maven dependency
 
 ```
-com.opuscapita.fsm:fsm-workflow-jvm-core:1.0.0-SNAPSHOT
+com.opuscapita.fsm:fsm4j-core:1.0.0-SNAPSHOT
 ```
 
 ### Use in code

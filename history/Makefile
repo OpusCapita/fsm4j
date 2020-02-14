@@ -2,7 +2,7 @@
 
 .PHONY: clean
 clean:
-	grails clean
+	rm -rf target
 
 .PHONY: test
 test:

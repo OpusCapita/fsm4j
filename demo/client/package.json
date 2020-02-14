@@ -1,5 +1,5 @@
 {
-  "name": "@opuscapita/fsm-workflow-jvm-demo",
+  "name": "@opuscapita/fsm4j-demo",
   "version": "2.2.9",
   "main": "index.js",
   "license": "MIT",
