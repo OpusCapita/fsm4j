@@ -53,10 +53,6 @@ clean-editor:
 test-editor:
 	$(MAKE) -C editor test
 
-.PHONY: deploy-editor
-deploy-editor: # Deploy editor
-	$(MAKE) -C editor deploy
-
 #-----------
 # demo tasks
 #-----------
@@ -88,7 +84,7 @@ start: install-core install-history start-demo
 build: install-core install-history build-demo
 
 .PHONY: deploy
-deploy: deploy-core deploy-history deploy-editor deploy-demo
+deploy: deploy-core deploy-history deploy-demo
 
 .PHONY: test
 test: test-core test-history test-editor

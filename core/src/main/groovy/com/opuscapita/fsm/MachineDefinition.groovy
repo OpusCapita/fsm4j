@@ -66,38 +66,25 @@ class MachineDefinition {
      * @return result as boolean
      */
     private List<Map> inspectConditions(params) {
-        Map implicitParams = params.implicitParams
-        // collecting conditions that belong to current transition
-        List preparedConditions = params.conditions.collect { Map condition ->
-            if (condition.expression) {
-                return condition
-            }
-            if (!conditions[condition.name]) {
+        //validate inbound conditions
+        for (condition in params.conditions) {
+            if (!condition.expression && !this.conditions[condition.name]) {
                 throw new IllegalArgumentException("Constraint '${condition.name}' is specified in one of transitions but corresponding condition is not found/implemented!")
             }
-            return conditions[condition.name]
         }
-
-
-        List result = []
-        for (int i = 0; i < preparedConditions.size(); i++) {
-            boolean isExpression = false
-            def condition = preparedConditions[i]
-            def res
-            if (condition instanceof Closure) {
-                res = condition(
-                        prepareParams(params.conditions[i].params, implicitParams)
-                ) as Boolean
+        Map implicitParams = params.implicitParams
+        // collecting conditions that belong to current transition
+        return params.conditions.collect { Map condition ->
+            if (condition.expression) {
+                boolean result = evaluateExpression(condition.expression, implicitParams) as Boolean
+                return [condition: condition, result: result]
             } else {
-                isExpression = true
-                String expression = condition.expression
-                res = evaluateExpression(expression, implicitParams) as Boolean
+                String name = condition.name
+                def preparedCondition = conditions[name]
+                boolean result = preparedCondition(prepareParams(condition.params, implicitParams)) as Boolean
+                return [condition: condition, result: condition.negate ? !result : result]
             }
-            // `negate` property is applied only to function invocations
-            result << [condition: params.conditions[i], result: params.conditions[i].negate && !isExpression ? !res : res]
         }
-
-        return result
     }
 
     private def evaluateExpression(String expression, implicitParams) {

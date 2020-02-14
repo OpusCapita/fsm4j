@@ -694,4 +694,23 @@ class MachineSpec extends Specification {
         then:
         thrown(Exception)
     }
+
+    def "should invalid conditions"() {
+        given:
+        def machine = new Machine(machineDefinition: new MachineDefinition([
+                schema: [
+                        initialState: "a",
+                        transitions: [
+                                [from: "a", to: "b", event: "a->b"],
+                                [from: "b", to: "c", event: "b->c", guards: [[name: "isEnabled"]]],
+                        ]
+                ]
+        ]))
+
+        when:
+        machine.sendEvent([object: [status: "b"], event: "b->c"])
+
+        then:
+        thrown(IllegalArgumentException)
+    }
 }
