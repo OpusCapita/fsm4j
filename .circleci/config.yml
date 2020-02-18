@@ -85,8 +85,8 @@ jobs:
     steps:
       - git/checkout-with-submodules
       - run:
-        name: Build and deploy demo to remote repository
-        command: if [ -z "$CIRCLE_TAG" ]; then make deploy-demo CI_BUILD_URL=${CIRCLE_BUILD_URL}; fi
+          name: Build and deploy demo to remote repository
+          command: if [ -z "$CIRCLE_TAG" ]; then make deploy-demo CI_BUILD_URL=${CIRCLE_BUILD_URL}; fi
 
 workflows:
   version: 2
