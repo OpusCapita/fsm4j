@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   git: opuscapita/git@volatile
+  codecov: codecov/codecov@1.0.5
 
 aliases:
   - &restore_cache
@@ -58,17 +59,34 @@ jobs:
     steps:
       - git/checkout-with-submodules
       - restore_cache: *restore_cache
-      - run: if [ ! -z "$CIRCLE_TAG" ]; then make deploy-release; else make deploy; fi
+      - run:
+          name: "Build, running tests and deploy the artefacts to remote repositories"
+          command: if [ ! -z "$CIRCLE_TAG" ]; then make deploy-release; else make deploy; fi
       - setup_remote_docker
-      - run: make build-docker
-      - run: make publish-docker
+      - run:
+          name: Build docker image
+          command: make build-docker
+      - run:
+          name: Publish docker image
+          command: make publish-docker 
       - save_cache: *save_cache
+      - codecov/upload:
+          flags: unittest
+          file: core/target/site/jacoco
+      - run:
+          name: Build technical documentation
+          command: make doc
+      - run:
+          name: Publish technical documentation
+          command: if [ ! -z "$CIRCLE_TAG" ]; then make doc-publish; fi
 
   deploy-demo:
     <<: *setup_docker
     steps:
       - git/checkout-with-submodules
-      - run: if [ -z "$CIRCLE_TAG" ]; then make deploy-demo CI_BUILD_URL=${CIRCLE_BUILD_URL}; fi
+      - run:
+        name: Build and deploy demo to remote repository
+        command: if [ -z "$CIRCLE_TAG" ]; then make deploy-demo CI_BUILD_URL=${CIRCLE_BUILD_URL}; fi
 
 workflows:
   version: 2

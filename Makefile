@@ -42,6 +42,14 @@ install-history:
 deploy-history:
 	$(MAKE) -C history deploy
 
+.PHONY: doc-history
+doc-history:
+	$(MAKE) -C history doc
+
+.PHONY: doc-publish-history
+doc-publish-history:
+	$(MAKE) -C history doc-publish
+
 #-------------
 # editor tasks
 #-------------
@@ -99,6 +107,12 @@ deploy-release: deploy-core deploy-history deploy-editor
 
 .PHONY: test
 test: test-core test-history test-editor
+
+.PHONY: doc
+doc: doc-history
+
+.PHONY: doc-publish
+doc-publish: doc-publish-history
 
 #-------------
 # docker tasks

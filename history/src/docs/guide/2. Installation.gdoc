@@ -1,0 +1,7 @@
+h2. Installation
+
+h3. Include grails plugin dependency
+
+{code}
+com.opuscapita.fsm:fsm4j-history:1.0.0-SNAPSHOT
+{code}
