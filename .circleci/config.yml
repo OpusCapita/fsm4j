@@ -74,6 +74,28 @@ jobs:
           flags: unittest
           file: core/target/site/jacoco/*.*
       - run:
+          name: 'History-plugin: Save grails test results.'
+          command: |
+            mkdir -p ~/history/test-xml-reports/
+            find . -type f -regex ".*/target/test-reports/.*xml" -exec cp -v {} ~/history/test-xml-reports/ \;
+          when: always
+          working_directory: ~/build/history
+      - store_test_results:
+          path: ~/history/test-xml-reports
+      - store_artifacts:
+          path: ~/history/test-xml-reports
+      - run:
+          name: 'Core-module: Save maven test results.'
+          command: |
+            mkdir -p ~/core/test-xml-reports/
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} ~/core/test-xml-reports/ \;
+          when: always
+          working_directory: ~/build/core
+      - store_test_results:
+          path: ~/core/test-xml-reports
+      - store_artifacts:
+          path: ~/core/test-xml-reports
+      - run:
           name: Build technical documentation
           command: make doc
       - run:
