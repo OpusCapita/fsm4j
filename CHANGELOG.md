@@ -1,4 +1,10 @@
 
+[Release 1.0.1](https://github.com/OpusCapita/fsm4j/releases/tag/v1.0.1) Fri Feb 14 2020 16:21:03 GMT+0300 (MSK)
+=======================================================
+
+- Merge branch 'master' of ssh://github.com/OpusCapita/fsm-workflow-jvm (Dmitry Divin divin@scand.com, 2020-02-14 16:06:17 +0300)
+- Adjustment release (Dmitry Divin divin@scand.com, 2020-02-14 16:06:07 +0300)
+
 [Release 1.0.0](https://github.com/OpusCapita/fsm4j/releases/tag/v1.0.0) Fri Feb 14 2020 15:43:42 GMT+0300 (MSK)
 =======================================================
 
