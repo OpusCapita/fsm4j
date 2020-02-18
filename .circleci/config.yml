@@ -72,7 +72,7 @@ jobs:
       - save_cache: *save_cache
       - codecov/upload:
           flags: unittest
-          file: core/target/site/jacoco
+          file: core/target/site/jacoco/*.*
       - run:
           name: Build technical documentation
           command: make doc
