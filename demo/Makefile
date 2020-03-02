@@ -1,28 +1,28 @@
 .DEFAULT_GOAL := help
 
 .PHONY: clean
-clean:
+clean: ## Clean
 	$(MAKE) -C client clean
 	$(MAKE) -C server clean
 
 .PHONY: deploy
-deploy:
+deploy: ## Deploy
 	$(MAKE) -C client build
 	$(MAKE) -C server deploy
 
 .PHONY: start-client
-start-client:
+start-client: ## Start client
 	$(MAKE) -C client build-watch
 
 .PHONY: start-server
-start-server:
+start-server: ## Start server
 	$(MAKE) -C server start
 
 .PHONY: start
-start:
+start: ## Start
 	$(MAKE) -j start-client start-server
 
-build:
+build: ## Build
 	$(MAKE) -C client build
 	$(MAKE) -C server build
 

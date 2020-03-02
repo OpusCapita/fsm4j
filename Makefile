@@ -1,6 +1,5 @@
 .DEFAULT_GOAL := help
 
-# goals which need credentials for NPM
 include $(shell ./build/grails/configure-maven.sh)
 include $(shell ./build/node/configure-npm.sh)
 

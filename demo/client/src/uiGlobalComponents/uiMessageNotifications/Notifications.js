@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import {
   NotificationContainer,
   NotificationManager
-} from 'react-notifications';
-import 'react-notifications/lib/notifications.css';
+} from '@opuscapita/react-notifications';
+import '@opuscapita/react-notifications/lib/notifications.css';
 import './styles.css';
 
 const isDef = /* istanbul ignore next */ param => param !== undefined && param !== null;

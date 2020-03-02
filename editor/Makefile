@@ -12,15 +12,15 @@ clean:
 	rm -rf coverage
 
 .PHONY: test
-test: install-dependencies
+test: install-dependencies ## Run tests
 	npm run test
 
 .PHONY: build
-build: install-dependencies
+build: install-dependencies ## Build
 	npm run build
 
 .PHONY: publish
-deploy: install-dependencies
+deploy: install-dependencies ## Deploy
 	npm publish --dry-run
 
 .PHONY: help

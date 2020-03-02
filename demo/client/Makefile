@@ -3,7 +3,7 @@
 .PHONY: install-dependencies
 install-dependencies:
 	npm i
-	npm link ../../editor
+	#npm link ../../editor
 
 .PHONY: clean
 clean:

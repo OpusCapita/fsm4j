@@ -14,10 +14,10 @@
   "dependencies": {
     "@opuscapita/i18n": "1.1.1",
     "@opuscapita/react-navigation": "0.1.2",
+    "@opuscapita/react-notifications": "1.4.3",
     "lodash": "4.17.5",
     "prop-types": "15.6.0",
     "react-bootstrap": "0.31.5",
-    "react-notifications": "1.4.3",
     "react-router-dom": "4.2.2",
     "superagent": "3.8.2"
   },

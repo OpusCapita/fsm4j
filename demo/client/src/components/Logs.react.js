@@ -1,14 +1,18 @@
 import React from "react"
 import superagent from 'superagent';
-import { url } from '../utils';
 
 export default class Logs extends React.Component {
+  static contextTypes = {
+    url: PropTypes.func.isRequired
+  }
+
   state = {
     offset: 0,
     events: []
   };
 
   loadEvents = () => {
+    const { url } = this.context;
     const {offset, events} = this.state;
     superagent.get(url(`/api/logEvents?offset=${offset}`)).then(res => {
       if (offset !== res.body.offset) {

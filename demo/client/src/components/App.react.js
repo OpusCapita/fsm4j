@@ -9,13 +9,23 @@ import Editor from './Editor.react';
 import Logs from './Logs.react';
 import WorkflowHistory from './History.react';
 import { notificationSuccess, notificationError } from '../constants';
-import { baseUrl } from '../utils';
 import './styles.css';
 
+const url = baseUrl => path => `${baseUrl}${path}`;
+
 export default class App extends PureComponent {
+  static propTypes = {
+    baseUrl: PropTypes.string
+  }
+
+  static defaultProps = {
+    baseUrl: '/fsmDemo'
+  }
+
   static childContextTypes = {
     i18n: PropTypes.object.isRequired,
-    uiMessageNotifications: PropTypes.object.isRequired
+    uiMessageNotifications: PropTypes.object.isRequired,
+    url: PropTypes.func.isRequired
   }
 
   constructor(...args) {
@@ -26,7 +36,8 @@ export default class App extends PureComponent {
   getChildContext() {
     return {
       i18n: this.i18n,
-      uiMessageNotifications
+      uiMessageNotifications,
+      url: url(this.props.baseUrl)
     }
   }
 
@@ -39,7 +50,7 @@ export default class App extends PureComponent {
     const MyMenu = withRouter(Menu);
 
     return (
-      <Router basename={baseUrl}>
+      <Router basename={this.props.baseUrl + '/fsmDemo'}>
         <div>
           <MyMenu/>
           <Route exact={true} path='/' component={HomePage}/>

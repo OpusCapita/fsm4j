@@ -7,12 +7,19 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const config = {
+  resolve: {
+    alias: {
+      '@opuscapita/fsm4j-editor': path.resolve(__dirname, '../../../editor')
+    }
+  },
   // context: path.resolve(__dirname, '../'),
   plugins,
   entry: path.resolve(__dirname, '../src/index.js'),
   output: {
     filename: 'editor-bundle.js',
-    path: path.resolve(__dirname, '../../server/web-app/js')
+    path: path.resolve(__dirname, '../../server/web-app/js'),
+    library: 'fsm4jDemo',
+    libraryTarget: 'umd',
   },
   externals: {
     react: 'React',

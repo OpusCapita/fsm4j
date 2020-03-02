@@ -16,7 +16,8 @@ install: refresh
 deploy: refresh
 	grails maven-deploy -Dgrails.env=prod -verbose --offline
 
-start: clean refresh
+.PHONY: start
+start: clean refresh ## Run application
 	grails run-app --offline
 
 build: clean refresh

@@ -22,6 +22,7 @@ module.exports = merge(common, {
     filename: 'bundle.js'
   },
   devServer: {
+    host: process.env.HOST || 'localhost',
     historyApiFallback: true,
     // inline: false
   },
