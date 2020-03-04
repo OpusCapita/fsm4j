@@ -50,7 +50,7 @@ class FsmEditorApiController {
                         businessObjectId  : objectId,
                         businessObjectType: "invoice"
                 ]
-        ])
+        ], [:], [:])
 
         render([history: result.findAll { it.event != "__START__" }] as JSON)
     }
