@@ -46,10 +46,7 @@ class FsmEditorApiController {
     def history() {
         String objectId = params.objectId
         List result = fsmEditorService.machine.getHistory([
-                object: [
-                        businessObjectId  : objectId,
-                        businessObjectType: "invoice"
-                ]
+                object: Invoice.findByInvoiceNo(objectId)
         ], [:], [:])
 
         render([history: result.findAll { it.event != "__START__" }] as JSON)

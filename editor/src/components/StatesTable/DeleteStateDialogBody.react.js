@@ -65,19 +65,19 @@ export default class DeleteStateDialogBody extends PureComponent {
               'fsmWorkflowEditor.ui.states.deleteDialog.message.swap',
               { stateName: getStateName(stateName) }
             )}
-            <FormControl
-              componentClass="select"
-              value={alternativeState}
-              onChange={this.handleSelectState}
-              onFocus={this.handleSelectOption(1)}
-            >
-              {
-                otherStates.map(({ name }, i) => (
-                  <option value={name} key={`${name}-${i}`}>{getStateName(name)}</option>
-                ))
-              }
-            </FormControl>
           </Radio>
+          <FormControl
+            componentClass="select"
+            value={alternativeState}
+            onChange={this.handleSelectState}
+            onFocus={this.handleSelectOption(1)}
+          >
+            {
+              otherStates.map(({ name }, i) => (
+                <option value={name} key={`${name}-${i}`}>{getStateName(name)}</option>
+              ))
+            }
+          </FormControl>
         </FormGroup>
       </div>
     )

@@ -119,7 +119,7 @@ class FsmEditorService implements ApplicationContextAware {
                 convertObjectToReference: { object ->
                     return [
                             businessObjType: "invoice",
-                            businessObjId  : "IN01"
+                            businessObjId  : object.invoiceNo
                     ]
                 }
         ])

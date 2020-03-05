@@ -56,6 +56,7 @@ export default class Editor extends PureComponent {
   }
 
   expressionEvaluator = ({code, arg}) => {
+    const {url} = this.context;
     return new Promise((response, reject) => {
       superagent.post(url("/api/eval")).send({code, arg})
         .then((res) => {

@@ -72,10 +72,7 @@ export default class History extends PureComponent {
       })
   }
 
-  stateLabel = stateName => (find(this.state.states, ({ name }) => name === stateName) || {}).description ||
-    startCase(stateName);
-
-  handleSelect = page => this.setState({ activePage: page })
+  handleSelect = page => this.setState({ activePage: page });
 
   render() {
     const { i18n } = this.context;
@@ -115,8 +112,8 @@ export default class History extends PureComponent {
                       map(({ from, to, event, finishedOn, user }, i) => (
                         <tr key={i}>
                           <td>{startCase(event)}</td>
-                          <td>{this.stateLabel(from)}</td>
-                          <td>{this.stateLabel(to)}</td>
+                          <td>{startCase(from)}</td>
+                          <td>{startCase(to)}</td>
                           <td>{user}</td>
                           <td>{i18n.formatDateTime(new Date(finishedOn))}</td>
                         </tr>
