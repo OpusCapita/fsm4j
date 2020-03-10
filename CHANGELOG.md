@@ -1,4 +1,16 @@
 
+[Release 1.0.2](https://github.com/OpusCapita/fsm4j/releases/tag/v1.0.2) Tue Mar 10 2020 08:07:34 GMT+0300 (MSK)
+=======================================================
+
+- Fixing minor bugs (Dmitry Divin divin@scand.com, 2020-03-05 10:49:47 +0300)
+- Fixing show history (Dmitry Divin divin@scand.com, 2020-03-04 12:19:13 +0300)
+- Fixing editor for IE11 and adjustment build (Dmitry Divin divin@scand.com, 2020-03-02 08:10:44 +0300)
+- Updating build config (Dmitry Divin divin@scand.com, 2020-02-18 11:21:10 +0300)
+- Updating build config (Dmitry Divin divin@scand.com, 2020-02-18 10:54:19 +0300)
+- Fixing build config (Dmitry Divin divin@scand.com, 2020-02-18 10:32:31 +0300)
+- Merge branch 'master' of ssh://github.com/OpusCapita/fsm-workflow-jvm (Dmitry Divin divin@scand.com, 2020-02-18 10:29:27 +0300)
+- Updating build and publish documentation (Dmitry Divin divin@scand.com, 2020-02-18 10:29:09 +0300)
+
 [Release 1.0.1](https://github.com/OpusCapita/fsm4j/releases/tag/v1.0.1) Fri Feb 14 2020 16:21:03 GMT+0300 (MSK)
 =======================================================
 
