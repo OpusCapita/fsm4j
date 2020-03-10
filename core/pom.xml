@@ -10,7 +10,7 @@
 
   <groupId>com.opuscapita.fsm</groupId>
   <artifactId>fsm4j-core</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
 
   <name>FSM - core</name>
 

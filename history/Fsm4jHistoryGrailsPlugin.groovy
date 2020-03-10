@@ -1,5 +1,5 @@
 class Fsm4jHistoryGrailsPlugin {
-    def version = "1.0.2"
+    def version = "1.0.3-SNAPSHOT"
     def groupId = "com.opuscapita.grailsplugins"
     def grailsVersion = "2.4 > *"
 
