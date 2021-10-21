@@ -40,9 +40,9 @@ jobs:
     docker:
     - image: docker
     steps:
-      - run: apk add --no-cache bash make git openssh
+      - run: apk add --no-cache bash make git openssh-client
       - checkout
-      - run: wget -O /vault.zip https://releases.hashicorp.com/vault/1.2.2/vault_1.2.2_linux_amd64.zip; unzip /vault.zip -d /usr/bin/
+      - run: wget -O /vault.zip https://releases.hashicorp.com/vault/1.8.4/vault_1.8.4_linux_amd64.zip; unzip /vault.zip -d /usr/bin/
       - setup_remote_docker
       - run:
           name: Check if image build is required
@@ -68,7 +68,7 @@ jobs:
           command: make build-docker
       - run:
           name: Publish docker image
-          command: make publish-docker 
+          command: make publish-docker
       - save_cache: *save_cache
       - codecov/upload:
           flags: unittest

@@ -42,13 +42,16 @@ RUN apt-get update && \
 COPY --from=opuscapita/minsk-core-ci:1 /root/.grails/settings.groovy /root/.grails/
 COPY --from=opuscapita/minsk-core-ci:1 /root/.npmrc /root/
 
-# get install script and pass it to execute: 
+# hotfix for Nexus migration
+RUN sed -i 's/grails.project.repos.mavenDeploy.url = System.getenv(\"MAVEN_REPO\")/grails.project.repos.mavenDeploy.url = System.getenv(\"MAVEN_REPO_DEPLOY\")/g' /root/.grails/settings.groovy
+
+# get install script and pass it to execute:
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash
-# and install node 
+# and install node
 RUN apt-get install -y nodejs
 
 # install vault
-RUN curl -fsSLk -o /tmp/vault.zip https://releases.hashicorp.com/vault/1.2.2/vault_1.2.2_linux_amd64.zip \
+RUN curl -fsSLk -o /tmp/vault.zip https://releases.hashicorp.com/vault/1.8.4/vault_1.8.4_linux_amd64.zip \
   && unzip /tmp/vault.zip -d /usr/local/bin/ \
   && rm -f /tmp/vault.zip
 
@@ -64,13 +67,13 @@ RUN apt-get update && apt-get install ca-certificates curl apt-transport-https l
   && apt-get update && apt-get install azure-cli
 
 # install Kubectl
-ARG KUBECTL_VERSION=1.15.3
+ARG KUBECTL_VERSION=1.21.2
 RUN curl -fLk -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl \
   && chmod +x /usr/bin/kubectl
 
 # Install Helm
-ARG HELM_VERSION=2.16.1
-RUN curl -fLk -o /usr/bin/helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
+ARG HELM_VERSION=2.17.0
+RUN curl -fLk -o /usr/bin/helm.tar.gz https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
   && cd /usr/bin && tar -xzf ./helm.tar.gz --strip-components=1 -C . linux-amd64/helm \
   && chmod +x /usr/bin/helm \
   && rm -rf /usr/bin/helm.tar.gz
