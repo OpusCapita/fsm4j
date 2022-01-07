@@ -37,7 +37,7 @@ if [ -z "$release" ]
 then
   echo "Release is not found in namespace $deployment_namespace"
 else
-  helm delete --purge $release
+  helm delete --namespace $deployment_namespace $release
 fi
 
 # deleting namespace
